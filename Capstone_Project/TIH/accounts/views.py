@@ -7,6 +7,14 @@ from .serializers import RegisterSerializer,LoginSerializer
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import LoginSerializer  # Import your LoginSerializer
 # Create your views here.
 
 class RegisterView(APIView):
@@ -34,34 +42,7 @@ class RegisterView(APIView):
             },status=status.HTTP_400_BAD_REQUEST)
 
 
-# class LoginView(APIView):
-#     def post(self, request):
-#         try:
-#             data = request.data
-#             serializer = LoginSerializer(data=data)
-#
-#             if not serializer.is_valid():
-#                 return Response({
-#                     'data': serializer.errors,
-#                     'message': 'Login error'
-#
-#                 }, status=status.HTTP_400_BAD_REQUEST)
-#             response = serializer.get_jwt_token(serializer.data)
-#
-#             return Response(response, status=status.HTTP_200_OK)
-#
-#         except Exception as e:
-#             print(e)
-#             return Response({
-#                 'data': {},
-#                 'message': 'something went wrong'
-#             }, status=status.HTTP_400_BAD_REQUEST)
-#
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .serializers import LoginSerializer  # Import your LoginSerializer
 
 class LoginView(APIView):
     def post(self, request):
@@ -96,10 +77,7 @@ class LoginView(APIView):
 #         }
 #         return response
 
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated
+
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]

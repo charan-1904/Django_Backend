@@ -45,6 +45,10 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError({'message': 'User not found', 'field_errors': {'username': 'User not found'}})
 
         return data
+    
+        # refresh = RefreshToken.for_user(user)
+        # access_token = str(refresh.access_token)
+        # refresh_token = str(refresh)
 
     def get_jwt_token(self, data):
         user = authenticate(username=data['username'], password=data['password'])
