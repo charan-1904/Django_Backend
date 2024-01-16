@@ -8,25 +8,30 @@ from .models import CustomUser
 
 
 class RegisterSerializer(serializers.Serializer):
-    first_name = serializers.CharField()
-    last_name = serializers.CharField()
+    # first_name = serializers.CharField()
+    # last_name = serializers.CharField()
     username = serializers.CharField()
     password = serializers.CharField()
     employee_id = serializers.IntegerField()
+    email = serializers.CharField()
 
     def validate(self, data):
         if CustomUser.objects.filter(username=data["username"]).exists():
             raise serializers.ValidationError('Username is taken.')
         if CustomUser.objects.filter(employee_id=data["employee_id"]).exists():
             raise serializers.ValidationError('Employee ID is taken.')
+        if CustomUser.objects.filter(email=data["email"]).exists():
+            raise serializers.ValidationError('email ID is taken.')
+        
         return data
 
     def create(self, validated_data):
         user = CustomUser.objects.create(
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name'],
+            # first_name=validated_data['first_name'],
+            # last_name=validated_data['last_name'],
             username=validated_data['username'].lower(),
-            employee_id=validated_data['employee_id']
+            employee_id=validated_data['employee_id'],
+            email = validated_data['email']
         )
         user.set_password(validated_data['password'])
         user.save()
