@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'accounts',
     'knox',
+    'corsheaders',
     'home'
 ]
 
@@ -56,6 +57,18 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
+
+]
+
+# CORS_ALLOWED_ORIGINS = [
+#     "*", http://localhost:3000/ 
+#     # Add the origin of your frontend
+#     # Add other origins as needed
+#   ]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Replace with your frontend origin
+    "https://*",
 ]
 
 ROOT_URLCONF = 'TIH.urls'
