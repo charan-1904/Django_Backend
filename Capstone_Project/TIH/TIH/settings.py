@@ -102,7 +102,11 @@ WSGI_APPLICATION = 'TIH.wsgi.application'
 DATABASES = {
     'default':{
         'ENGINE': 'djongo',
-        'NAME': 'tih'
+        'NAME': 'tih',
+        "CLIENT": {
+        'host': 'mongodb://admin:admin_password@13.48.46.173:27017/',
+       
+        }
     }
 }
 
@@ -113,6 +117,13 @@ DATABASES = {
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+
+
+
+
+
+
+
 # DATABASES = {
 # "default": {
 #     "ENGINE": "djongo",
