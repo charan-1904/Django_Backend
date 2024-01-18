@@ -48,19 +48,42 @@ class LoginSerializer(serializers.Serializer):
     employee_id = serializers.IntegerField()
     password = serializers.CharField()
 
+    # def validate(self, data):
+    #     employee_id = data.get('employee_id')
+    #     password = data.get('password')
+
+    #     user = CustomUser.objects.filter(employee_id=employee_id).first()
+
+    #     if not user:
+    #         raise serializers.ValidationError({'message': 'User not found', 'field_errors': {'employee_id': 'User not found'}})
+
+    #     if not user.check_password(password):
+    #         raise serializers.ValidationError({'message': 'Invalid credentials', 'field_errors': {'password': 'Invalid password'}})
+
+    #     return data
+
+
+
+
     def validate(self, data):
         employee_id = data.get('employee_id')
         password = data.get('password')
 
+        print(f"Attempting login with employee_id: {employee_id}")
+
         user = CustomUser.objects.filter(employee_id=employee_id).first()
 
         if not user:
+            print(f"User not found for employee_id: {employee_id}")
             raise serializers.ValidationError({'message': 'User not found', 'field_errors': {'employee_id': 'User not found'}})
 
         if not user.check_password(password):
+            print(f"Invalid password for user with employee_id: {employee_id}")
             raise serializers.ValidationError({'message': 'Invalid credentials', 'field_errors': {'password': 'Invalid password'}})
 
+        print(f"Login successful for user with employee_id: {employee_id}")
         return data
+
 
     def get_jwt_token(self, data):
         user = CustomUser.objects.filter(employee_id=data['employee_id']).first()
