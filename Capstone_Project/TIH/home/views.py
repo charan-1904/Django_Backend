@@ -10,11 +10,58 @@ from .models import Blog
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
+from django.db import connections
+from django.db.models import F
+from django.http import JsonResponse
+
+
 
 class BlogView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
+
     # def get(self, request):
+    #     try:
+    #         # Assuming 'created_at' is a field in your Blog model
+    #         random_blogs = Blog.objects.raw([
+    #             {
+    #                 '$match': {
+    #                     'title': {'$regex': request.GET.get('search', ''), '$options': 'i'}
+    #                     # Add other conditions for blog_text and user__username if needed
+    #                 }
+    #             },
+    #             {
+    #                 '$addFields': {
+    #                     'random_order': {'$rand': {}}
+    #                 }
+    #             },
+    #             {
+    #                 '$sort': {'random_order': 1}
+    #             },
+    #             {
+    #                 '$limit': 5
+    #             }
+    #         ])
+
+    #         serializer = BlogSerializer(random_blogs, many=True)
+
+    #         return JsonResponse({
+    #             'data': serializer.data,
+    #             'message': 'Random blogs fetched successfully'
+    #         }, status=status.HTTP_201_CREATED)
+    #     except Exception as e:
+    #         print(e)
+    #         return JsonResponse({
+    #             'data': [],
+    #             'message': 'Something went wrong'
+    #         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+#     def get(self, request):
 #         try:
 #             # blogs = Blog.objects.filter(user = request.user)
 #             blogs = Blog.objects.all().order_by('?')
@@ -127,7 +174,7 @@ class BlogView(APIView):
             return self.get_by_uid(request, uid)
         else:
             try:
-                blogs = Blog.objects.all().order_by('?')
+                blogs = Blog.objects.all()
 
                 if request.GET.get('search'):
                     search = request.GET.get('search')  
@@ -180,31 +227,57 @@ class BlogView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
+    # def post(self, request):
+    #     try:
+    #         data = request.data
+    #         print(request.user)
+    #         data['user'] = request.user.id 
+    #         serializer = BlogSerializer(data = data)
+
+    #         if not serializer.is_valid():
+    #             return Response({
+    #                 'data' : serializer.errors,
+    #                 'message' : 'something went wrong'
+    #             }, status = status.HTTP_400_BAD_REQUEST)
+    #         serializer.save()
+
+    #         return Response({
+    #             'data' : serializer.data,
+    #             "message": "Blog post created successfully"
+    #             }, status=status.HTTP_201_CREATED)
+        
+    #     except Exception as e:
+    #         print(e)
+    #         return Response({
+    #                 'data' : serializer.errors,
+    #                 'message' : 'something went wrong'
+    #             }, status = status.HTTP_400_BAD_REQUEST) 
+
     def post(self, request):
         try:
-            data = request.data
+            data = request.data.copy()  # Create a mutable copy of QueryDict
             print(request.user)
             data['user'] = request.user.id 
-            serializer = BlogSerializer(data = data)
+            serializer = BlogSerializer(data=data)
 
             if not serializer.is_valid():
                 return Response({
-                    'data' : serializer.errors,
-                    'message' : 'something went wrong'
-                }, status = status.HTTP_400_BAD_REQUEST)
+                    'data': serializer.errors,
+                    'message': 'something went wrong'
+                }, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
 
             return Response({
-                'data' : serializer.data,
+                'data': serializer.data,
                 "message": "Blog post created successfully"
-                }, status=status.HTTP_201_CREATED)
-        
+            }, status=status.HTTP_201_CREATED)
+
         except Exception as e:
             print(e)
             return Response({
-                    'data' : serializer.errors,
-                    'message' : 'something went wrong'
-                }, status = status.HTTP_400_BAD_REQUEST) 
+                'data': [],
+                'message': 'something went wrong'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -341,3 +414,42 @@ class BlogByTagView(ListAPIView):
         else:
             return Blog.objects.all()
 
+class BlogListView(APIView):
+    def get(self, request, *args, **kwargs):
+        try:
+            tag_name = self.kwargs.get('tag_name')  # Assuming your URL pattern includes the tag name parameter
+            blogs = Blog.objects.all()
+
+            if tag_name:
+                blogs = blogs.filter(tags__contains=[tag_name])
+
+            if request.GET.get('search'):
+                search = request.GET.get('search')
+                search_terms = [term.strip() for term in search.split('$')]
+
+                # Construct a dynamic Q object to combine multiple conditions
+                conditions = Q()
+                for term in search_terms:
+                    conditions &= (
+                        Q(title__icontains=term) |
+                        Q(user__username__icontains=term)
+                    )
+
+                # Apply the constructed conditions to filter the queryset
+                blogs = blogs.filter(conditions)
+
+            page_number = request.GET.get('page', 1)
+            paginator = Paginator(blogs, 5)
+            serializer = BlogSerializer(paginator.page(page_number), many=True)
+
+            return Response({
+                'data': serializer.data,
+                'message': 'Blogs fetched successfully'
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            print(e)
+            return Response({
+                'data': [],
+                'message': 'Something went wrong'
+            }, status=status.HTTP_400_BAD_REQUEST)
