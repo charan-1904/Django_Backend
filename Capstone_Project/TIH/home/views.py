@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from rest_framework.response import Response
-from .serializers import BlogSerializer
+from .serializers import BlogDSerializer, BlogSerializer
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework.permissions import  IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .models import Blog
+from .models import Blog, Comment, Reply
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
@@ -167,63 +167,102 @@ class BlogView(APIView):
 
 
 
-    def get(self, request, *args, **kwargs):
-        uid = kwargs.get('uid')
+    # def get(self, request, *args, **kwargs):
+    #     uid = kwargs.get('uid')
         
-        if uid:
-            return self.get_by_uid(request, uid)
-        else:
-            try:
-                blogs = Blog.objects.all()
+    #     if uid:
+    #         return self.get_by_uid(request, uid)
+    #     else:
+    #         try:
+    #             blogs = Blog.objects.all()
 
-                if request.GET.get('search'):
-                    search = request.GET.get('search')  
-                    search_terms = [term.strip() for term in search.split('$')]
-                    print(search)
-                    print(search_terms)
+    #             if request.GET.get('search'):
+    #                 search = request.GET.get('search')  
+    #                 search_terms = [term.strip() for term in search.split('$')]
+    #                 print(search)
+    #                 print(search_terms)
 
-                    # Construct a dynamic Q object to combine multiple conditions
-                    conditions = Q()
-                    for term in search_terms:
-                        conditions &= (
-                            Q(title__icontains=term) |
-                            Q(user__username__icontains=term)
-                        )
+    #                 # Construct a dynamic Q object to combine multiple conditions
+    #                 conditions = Q()
+    #                 for term in search_terms:
+    #                     conditions &= (
+    #                         Q(title__icontains=term) |
+    #                         Q(user__username__icontains=term)
+    #                     )
 
-                    # Apply the constructed conditions to filter the queryset
-                    blogs = blogs.filter(conditions)
+    #                 # Apply the constructed conditions to filter the queryset
+    #                 blogs = blogs.filter(conditions)
 
-                page_number = request.GET.get('page', 1)
-                paginator = Paginator(blogs, 5)
-                serializer = BlogSerializer(paginator.page(page_number), many=True)
+    #             page_number = request.GET.get('page', 1)
+    #             paginator = Paginator(blogs, 5)
+    #             serializer = BlogSerializer(paginator.page(page_number), many=True)
 
-                return Response({
-                    'data': serializer.data,
-                    'message': 'blogs fetched successfully'
-                }, status=status.HTTP_201_CREATED)
+    #             return Response({
+    #                 'data': serializer.data,
+    #                 'message': 'blogs fetched successfully'
+    #             }, status=status.HTTP_201_CREATED)
 
-            except Exception as e:
-                print(e)
-                return Response({
-                    'data': [],
-                    'message': 'something went wrong'
-                }, status=status.HTTP_400_BAD_REQUEST)
+    #         except Exception as e:
+    #             print(e)
+    #             return Response({
+    #                 'data': [],
+    #                 'message': 'something went wrong'
+    #             }, status=status.HTTP_400_BAD_REQUEST)
 
-    def get_by_uid(self, request, uid):
-        try:
-            blog = get_object_or_404(Blog, uid=uid)
-            serializer = BlogSerializer(blog)
+    # def get_by_uid(self, request, uid):
+    #     try:
+    #         blog = get_object_or_404(Blog, uid=uid)
+    #         serializer = BlogSerializer(blog)
             
+    #         return Response({
+    #             'data': serializer.data,
+    #             'message': 'blog fetched successfully'
+    #         }, status=status.HTTP_200_OK)
+
+    #     except Exception as e:
+    #         print(e)
+    #         return Response({
+    #             'data': [],
+    #             'message': 'something went wrong'
+    #         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+    def get(self, request, *args, **kwargs):
+        try:
+            blogs = Blog.objects.all()
+
+            if request.GET.get('search'):
+                search = request.GET.get('search')  
+                search_terms = [term.strip() for term in search.split('$')]
+                print(search)
+                print(search_terms)
+
+                # Construct a dynamic Q object to combine multiple conditions
+                conditions = Q()
+                for term in search_terms:
+                    conditions &= (
+                        Q(title__icontains=term) |
+                        Q(user__username__icontains=term)
+                    )
+
+                # Apply the constructed conditions to filter the queryset
+                blogs = blogs.filter(conditions)
+
+            page_number = request.GET.get('page', 1)
+            paginator = Paginator(blogs, 5)
+            serializer = BlogSerializer(paginator.page(page_number), many=True)
+
             return Response({
                 'data': serializer.data,
-                'message': 'blog fetched successfully'
+                'message': 'Blogs fetched successfully'
             }, status=status.HTTP_200_OK)
 
         except Exception as e:
             print(e)
             return Response({
                 'data': [],
-                'message': 'something went wrong'
+                'message': 'Something went wrong'
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -307,41 +346,81 @@ class BlogView(APIView):
     #             'message': 'Something went wrong.'
     #         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    # def patch(self, request):
+    #     try:
+    #         data = request.data 
+    #         blog = Blog.objects.filter(uid = data.get('uid'))
+
+    #         if not blog.exists():
+    #             return Response({
+    #                 'data' : {},
+    #                 'message' : 'invalid blog uid'
+    #             }, status = status.HTTP_400_BAD_REQUEST)  
+    #         if request.user != blog[0].user:
+    #             return Response({
+    #                 'data' : {},
+    #                 'message' : 'you are not authorized to do this'
+    #             }, status = status.HTTP_400_BAD_REQUEST)  
+    #         serializer = BlogSerializer(blog[0],data =data, partial = True)
+
+    #         if not serializer.is_valid():
+    #             return Response({
+    #                 'data' : serializer.errors,
+    #                 'message' : 'something went wrong'
+    #             }, status = status.HTTP_400_BAD_REQUEST) 
+    #         serializer.save()
+    #         return Response({
+    #             'data' : serializer.data,
+    #             'message' : "blog updated succesfully" 
+    #         }, status=status.HTTP_201_CREATED)
+ 
+
+    #     except Exception as e:
+    #         print(e)
+    #         return Response({
+    #                 'data' : [],
+    #                 'message' : 'something went wrong'
+    #             }, status = status.HTTP_400_BAD_REQUEST) 
+        
+
+
+
     def patch(self, request):
         try:
-            data = request.data 
-            blog = Blog.objects.filter(uid = data.get('uid'))
+            data = request.data
+            blog = Blog.objects.filter(uid=data.get('uid'))
 
             if not blog.exists():
                 return Response({
-                    'data' : {},
-                    'message' : 'invalid blog uid'
-                }, status = status.HTTP_400_BAD_REQUEST)  
+                    'data': {},
+                    'message': 'Invalid blog UID'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
             if request.user != blog[0].user:
                 return Response({
-                    'data' : {},
-                    'message' : 'you are not authorized to do this'
-                }, status = status.HTTP_400_BAD_REQUEST)  
-            serializer = BlogSerializer(blog[0],data =data, partial = True)
+                    'data': {},
+                    'message': 'You are not authorized to do this'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            serializer = BlogSerializer(blog[0], data=data, partial=True)
 
             if not serializer.is_valid():
                 return Response({
-                    'data' : serializer.errors,
-                    'message' : 'something went wrong'
-                }, status = status.HTTP_400_BAD_REQUEST) 
+                    'data': serializer.errors,
+                    'message': 'Something went wrong'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
             serializer.save()
             return Response({
-                'data' : serializer.data,
-                'message' : "blog updated succesfully" 
+                'data': serializer.data,
+                'message': "Blog updated successfully"
             }, status=status.HTTP_201_CREATED)
- 
 
         except Exception as e:
-            print(e)
             return Response({
-                    'data' : [],
-                    'message' : 'something went wrong'
-                }, status = status.HTTP_400_BAD_REQUEST) 
+                'data': {},
+                'message': 'Something went wrong'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     def delete(self, request):
         try:
@@ -497,8 +576,145 @@ class BlogListView(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
 
         except Exception as e:
-            logger.error(f"An error occurred: {e}")
+            # logger.error(f"An error occurred: {e}")
             return Response({
                 'data': [],
                 'message': 'Something went wrong'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+
+
+class BlogDetailView(APIView):
+    def get(self, request, *args, **kwargs):
+        uid = kwargs.get('uid')
+
+        try:
+            blog = get_object_or_404(Blog, uid=uid)
+            serializer = BlogDSerializer(blog)
+            
+            return Response({
+                'data': serializer.data,
+                'message': 'Blog fetched successfully'
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            print(e)
+            return Response({
+                'data': [],
+                'message': 'Something went wrong'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+    # def post(self, request, *args, **kwargs):
+    #     uid = kwargs.get('uid')
+
+    #     try:
+    #         blog = get_object_or_404(Blog, uid=uid)
+    #         user = request.user  # Assuming the user is authenticated
+
+    #         # Extract comment data from the request
+    #         comment_text = request.data.get('text')
+    #         parent_comment_id = request.data.get('parent_comment_id')  # If you want to support replies
+
+    #         # Create a new comment instance
+    #         comment = Comment.objects.create(user=user, text=comment_text)
+
+    #         # If it's a reply, set the parent_comment
+    #         if parent_comment_id:
+    #             parent_comment = get_object_or_404(Comment, id=parent_comment_id)
+    #             comment.parent_comment = parent_comment
+    #             comment.save()
+
+    #         # Add the comment to the blog's comments
+    #         blog.comments.add(comment)
+
+    #         serializer = BlogDSerializer(blog)
+            
+    #         return Response({
+    #             'data': serializer.data,
+    #             'message': 'Comment posted successfully'
+    #         }, status=status.HTTP_201_CREATED)
+
+    #     except Exception as e:
+    #         print(e)
+    #         return Response({
+    #             'data': [],
+    #             'message': 'Something went wrong'
+    #         }, status=status.HTTP_400_BAD_REQUEST)
+        
+
+    # def post(self, request, *args, **kwargs):
+    #     uid = kwargs.get('uid')
+
+    #     try:
+    #         blog = get_object_or_404(Blog, uid=uid)
+    #         user = request.user  # Assuming the user is authenticated
+
+    #         # Extract comment data from the request
+    #         comment_text = request.data.get('text')
+    #         parent_comment_id = request.data.get('parent_comment_id')  # If you want to support replies
+
+    #         # Create a new comment instance
+    #         comment = Comment.objects.create(user=user, text=comment_text)
+
+    #         # If it's a reply, set the parent_comment
+    #         if parent_comment_id:
+    #             parent_comment = get_object_or_404(Comment, uid=parent_comment_id)
+    #             comment.parent_comment = parent_comment
+    #             comment.save()
+
+    #         # Add the comment to the blog's comments
+    #         blog.comments.add(comment)
+
+    #         serializer = BlogDSerializer(blog)
+            
+    #         return Response({
+    #             'data': serializer.data,
+    #             'message': 'Comment posted successfully'
+    #         }, status=status.HTTP_201_CREATED)
+
+    #     except Exception as e:
+    #         print(e)
+    #         return Response({
+    #             'data': [],
+    #             'message': 'Something went wrong'
+    #         }, status=status.HTTP_400_BAD_REQUEST)
+        
+    def post(self, request, *args, **kwargs):
+        uid = kwargs.get('uid')
+
+        try:
+            blog = get_object_or_404(Blog, uid=uid)
+            user = request.user  # Assuming the user is authenticated
+
+            # Extract comment data from the request
+            comment_text = request.data.get('text')
+            parent_comment_id = request.data.get('parent_comment_id')
+
+            # Create a new comment instance
+            comment = Comment.objects.create(user=user, text=comment_text)
+
+            # If it's a reply, create a new reply instance
+            if parent_comment_id:
+                parent_comment = get_object_or_404(Comment, uid=parent_comment_id)
+                reply_text = request.data.get('text')  # Extract reply text
+                reply = Reply.objects.create(comment=parent_comment, text=reply_text)
+
+            # Add the comment to the blog's comments
+            blog.comments.add(comment)
+
+            # Serialize the updated blog
+            serializer = BlogDSerializer(blog)
+
+            return Response({
+                'data': serializer.data,
+                'message': 'Comment posted successfully'
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            print(e)
+            return Response({
+                'data': [],
+                'message': 'Something went wrong'
+            }, status=status.HTTP_400_BAD_REQUEST)
+    
