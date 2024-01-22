@@ -27,6 +27,7 @@ class RegisterView(APIView):
             }, status = status.HTTP_201_CREATED)
 
         except Exception as e:
+            print(e)
             return Response({
                 'data' : {},
                 'message' : 'something went wrong'

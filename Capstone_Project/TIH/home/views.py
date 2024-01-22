@@ -414,14 +414,57 @@ class BlogByTagView(ListAPIView):
         else:
             return Blog.objects.all()
 
+# class BlogListView(APIView):
+#     def get(self, request, *args, **kwargs):
+#         try:
+#             tag_name = self.kwargs.get('tag_name')  # Assuming your URL pattern includes the tag name parameter
+#             blogs = Blog.objects.all()
+
+#             if tag_name:
+#                 blogs = blogs.filter(tags__contains=[tag_name])
+
+#             if request.GET.get('search'):
+#                 search = request.GET.get('search')
+#                 search_terms = [term.strip() for term in search.split('$')]
+
+#                 # Construct a dynamic Q object to combine multiple conditions
+#                 conditions = Q()
+#                 for term in search_terms:
+#                     conditions &= (
+#                         Q(title__icontains=term) |
+#                         Q(user__username__icontains=term)
+#                     )
+
+#                 # Apply the constructed conditions to filter the queryset
+#                 blogs = blogs.filter(conditions)
+
+#             page_number = request.GET.get('page', 1)
+#             paginator = Paginator(blogs, 5)
+#             serializer = BlogSerializer(paginator.page(page_number), many=True)
+
+#             return Response({
+#                 'data': serializer.data,
+#                 'message': 'Blogs fetched successfully'
+#             }, status=status.HTTP_200_OK)
+
+#         except Exception as e:
+#             print(e)
+#             return Response({
+#                 'data': [],
+#                 'message': 'Something went wrong'
+#             }, status=status.HTTP_400_BAD_REQUEST)
+        
+
+
 class BlogListView(APIView):
     def get(self, request, *args, **kwargs):
         try:
-            tag_name = self.kwargs.get('tag_name')  # Assuming your URL pattern includes the tag name parameter
+            tag_name = self.kwargs.get('tag_name')
             blogs = Blog.objects.all()
 
             if tag_name:
-                blogs = blogs.filter(tags__contains=[tag_name])
+                # Use __icontains for TextField
+                blogs = blogs.filter(tags__icontains=tag_name)
 
             if request.GET.get('search'):
                 search = request.GET.get('search')
@@ -440,16 +483,22 @@ class BlogListView(APIView):
 
             page_number = request.GET.get('page', 1)
             paginator = Paginator(blogs, 5)
-            serializer = BlogSerializer(paginator.page(page_number), many=True)
+            serialized_blogs = BlogSerializer(paginator.page(page_number), many=True).data
 
             return Response({
-                'data': serializer.data,
+                'data': serialized_blogs,
                 'message': 'Blogs fetched successfully'
             }, status=status.HTTP_200_OK)
 
+        except Blog.DoesNotExist:
+            return Response({
+                'data': [],
+                'message': 'No blogs found'
+            }, status=status.HTTP_404_NOT_FOUND)
+
         except Exception as e:
-            print(e)
+            logger.error(f"An error occurred: {e}")
             return Response({
                 'data': [],
                 'message': 'Something went wrong'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
