@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework.response import Response
-from .serializers import BlogDSerializer, BlogSerializer
+from .serializers import BlogDSerializer, BlogSerializer, CommentSerializer, ReplySerializer
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import generics
@@ -717,4 +717,38 @@ class BlogDetailView(APIView):
                 'data': [],
                 'message': 'Something went wrong'
             }, status=status.HTTP_400_BAD_REQUEST)
-    
+        
+from rest_framework import viewsets
+from rest_framework.decorators import action
+
+
+class BlogViewSet(viewsets.ModelViewSet):
+    queryset = Blog.objects.all()
+    serializer_class = BlogDSerializer
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
+    # @action(detail=True, methods=['post'])
+    # def add_reply(self, request, pk=None):
+    #     comment = self.get_object()
+        
+    #     reply_text = request.data.get('text', '')
+    #     user = request.user
+    #     reply = Reply.objects.create(comment=comment, text=reply_text)
+    #     reply_serializer = ReplySerializer(reply)
+    #     return Response({'reply': reply_serializer.data}, status=201)
+    @action(detail=True, methods=['post'])
+    def add_reply(self, request, pk=None):
+        comment = self.get_object()
+        reply_text = request.data.get('text', '')
+
+        # Assuming you have access to the user making the reply, you can get it from the request
+        user = request.user
+
+        # Create the Reply instance with the user
+        reply = Reply.objects.create(comment=comment, user=user, text=reply_text)
+
+        reply_serializer = ReplySerializer(reply)
+        return Response({'reply': reply_serializer.data}, status=201)

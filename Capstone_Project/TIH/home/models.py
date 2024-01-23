@@ -53,6 +53,8 @@ class Comment(BaseModel):
 
 class Reply(BaseModel):
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='replies')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)  
+
     text = models.TextField()
 
     def __str__(self):
