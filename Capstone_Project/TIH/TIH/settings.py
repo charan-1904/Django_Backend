@@ -201,3 +201,7 @@ REST_FRAMEWORK = {
     ]
     # Other settings...
 }
+
+MEDIA_URL = '/blogs/'
+MEDIA_ROOT = BASE_DIR / "blogs"
+

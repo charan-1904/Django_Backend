@@ -65,6 +65,7 @@ class Blog(BaseModel):
     title = models.CharField(max_length=500)
     blog_text = models.TextField()
     main_image = models.ImageField(upload_to="blogs")
+    video=models.FileField(upload_to="blogs")
     tags = models.TextField(max_length=255)
     comments = models.ManyToManyField(Comment, related_name='blog_comments', blank=True)
 
