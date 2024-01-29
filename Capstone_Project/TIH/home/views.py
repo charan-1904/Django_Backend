@@ -1,5 +1,8 @@
 from django.shortcuts import render
 from rest_framework.response import Response
+
+from accounts import serializers
+from accounts.models import CustomUser
 from .serializers import BlogDSerializer, BlogSerializer, CommentSerializer, ReplySerializer
 from rest_framework import status
 from rest_framework.views import APIView
@@ -25,6 +28,27 @@ class BlogView(APIView):
     def get(self, request, *args, **kwargs):
         try:
             blogs = Blog.objects.all()
+
+            blogs = Blog.objects.all()
+
+        # Construct the response for each blog in the desired format
+            blogs_data = []
+            for blog in blogs:
+                blog_data = {
+                    "id": blog.uid,
+                    "image": f"url({blog.main_image})" if blog.main_image else "",
+                    "title": blog.title,
+                    "post_link": str(blog.uid),
+                    "tag_link": blog.tags,
+                    "tag": blog.tags,
+                    "date": blog.created_at.strftime("%d %B"),  # Format date as needed
+                    "votes": 0,  # You may adjust this based on your logic
+                    "user_username": blog.user.username if blog.user else "",
+                }
+                blogs_data.append(blog_data)
+
+
+
 
             if request.GET.get('search'):
                 search = request.GET.get('search')
@@ -56,7 +80,7 @@ class BlogView(APIView):
             serializer = BlogSerializer(paginated_blogs, many=True)
 
             return Response({
-                'data': serializer.data,
+                'data': blogs_data,
                 'message': 'Blogs fetched successfully'
             }, status=status.HTTP_200_OK)
 
@@ -248,13 +272,33 @@ from rest_framework.generics import ListAPIView
 
 class BlogByTagView(ListAPIView):
     serializer_class = BlogSerializer
+    
 
     def get_queryset(self):
         tag_name = self.kwargs.get('tag_name')
+        blogs_data = []
+        blogs = Blog.objects.all()
+        for blog in blogs:
+            blog_data = {
+                "id": blog.uid,
+                "image": f"url({blog.main_image})" if blog.main_image else "",
+                "title": blog.title,
+                "post_link": str(blog.uid),
+                "tag_link": blog.tags,
+                "tag": blog.tags,
+                "date": blog.created_at.strftime("%d %B"),  # Format date as needed
+                "votes": 0,  # You may adjust this based on your logic
+                "user_username": blog.user.username if blog.user else "",
+            }
+            blogs_data.append(blog_data)
+
+
+
+
         if tag_name:
-            return Blog.objects.filter(tags__name=tag_name)
+            return blogs_data.objects.filter(tags__name=tag_name)
         else:
-            return Blog.objects.all()
+            return blogs_data.all()
 
 # 
 
@@ -264,6 +308,7 @@ class BlogListView(APIView):
         try:
             tag_name = self.kwargs.get('tag_name')
             blogs = Blog.objects.all()
+            
 
             if tag_name:
                 # Use __icontains for TextField
@@ -307,27 +352,51 @@ class BlogListView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
-
+from rest_framework import serializers
+class CustomUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = '__all__'
 
 class BlogDetailView(APIView):
     def get(self, request, *args, **kwargs):
         uid = kwargs.get('uid')
+        
 
-        try:
-            blog = get_object_or_404(Blog, uid=uid)
-            serializer = BlogDSerializer(blog)
+
+    #     try:
+    #         blog = get_object_or_404(Blog, uid=uid)
+    #         serializer = BlogDSerializer(blog)
             
-            return Response({
-                'data': serializer.data,
-                'message': 'Blog fetched successfully'
-            }, status=status.HTTP_200_OK)
+    #         return Response({
+    #             'data': serializer.data,
+    #             'message': 'Blog fetched successfully'
+    #         }, status=status.HTTP_200_OK)
 
-        except Exception as e:
-            print(e)
-            return Response({
-                'data': [],
-                'message': 'Something went wrong'
-            }, status=status.HTTP_400_BAD_REQUEST)
+    #     except Exception as e:
+    #         print(e)
+    #         return Response({
+    #             'data': [],
+    #             'message': 'Something went wrong'
+    #         }, status=status.HTTP_400_BAD_REQUEST)
+
+        blog = Blog.objects.get(uid=uid)
+        user_serializer = CustomUserSerializer(blog.user)
+
+            # Construct the response in the desired format
+        response_data = {
+            "id": blog.uid,
+            "image": f"url({blog.main_image})" if blog.main_image else "",
+            "title": blog.title,
+            "post_link": str(blog.uid),
+            "tag_link": blog.tags,
+            "tag": blog.tags,
+            "date": blog.created_at.strftime("%d %B"),  # Format date as needed
+            "votes": 0,  # You may adjust this based on your logic
+            "user_username": user_serializer.data['username'],  # Include only the username field
+        }
+
+        return Response(response_data)
         
     # 
         
