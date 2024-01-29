@@ -131,7 +131,7 @@ class BlogView(APIView):
                     "post_link": str(blog.uid),
                     "tag_link": blog.tags,
                     "tag": blog.tags,
-                    "date": blog.created_at.strftime("%d %B"),  # Format date as needed
+                    "date": blog.created_at.strftime("%d %B %Y %H:%M"),
                     "votes": 0,  # You may adjust this based on your logic
                     "user_username": blog.user.username if blog.user else "",
                 }
@@ -139,6 +139,8 @@ class BlogView(APIView):
 
             # Fetch all blogs again for applying search conditions
             blogs = Blog.objects.all()
+            blogs_data = sorted(blogs_data, key=lambda x: x['date'], reverse=True)
+
 
             # If search parameter is provided, apply the filter
             if request.GET.get('search'):
@@ -174,14 +176,14 @@ class BlogView(APIView):
                 # blogs_data += blogs_data
 
             # Sort the queryset by a specific field, for example, 'created_at'
-            blogs = blogs.order_by('created_at')
+            blogs = blogs.order_by('-created_at')
 
             # Print the count of filtered blogs
             print(blogs.count())
 
             # Paginate the blogs_data
             page_number = request.GET.get('page', 1)
-            paginator = Paginator(blogs_data, 5)
+            paginator = Paginator(blogs_data, 15)
 
             try:
                 paginated_blogs_data = paginator.page(page_number)
@@ -472,39 +474,39 @@ class BlogDetailView(APIView):
         
 
 
-    #     try:
-    #         blog = get_object_or_404(Blog, uid=uid)
-    #         serializer = BlogDSerializer(blog)
+        try:
+            blog = get_object_or_404(Blog, uid=uid)
+            serializer = BlogDSerializer(blog)
             
-    #         return Response({
-    #             'data': serializer.data,
-    #             'message': 'Blog fetched successfully'
-    #         }, status=status.HTTP_200_OK)
+            return Response({
+                'data': serializer.data,
+                'message': 'Blog fetched successfully'
+            }, status=status.HTTP_200_OK)
 
-    #     except Exception as e:
-    #         print(e)
-    #         return Response({
-    #             'data': [],
-    #             'message': 'Something went wrong'
-    #         }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(e)
+            return Response({
+                'data': [],
+                'message': 'Something went wrong'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
-        blog = Blog.objects.get(uid=uid)
-        user_serializer = CustomUserSerializer(blog.user)
+        # blog = Blog.objects.get(uid=uid)
+        # user_serializer = CustomUserSerializer(blog.user)
 
-            # Construct the response in the desired format
-        response_data = {
-            "id": blog.uid,
-            "image": f"{blog.main_image}" if blog.main_image else "",
-            "title": blog.title,
-            "post_link": str(blog.uid),
-            "tag_link": blog.tags,
-            "tag": blog.tags,
-            "date": blog.created_at.strftime("%d %B"),  # Format date as needed
-            "votes": 0,  # You may adjust this based on your logic
-            "user_username": user_serializer.data['username'],  # Include only the username field
-        }
+        #     # Construct the response in the desired format
+        # response_data = {
+        #     "id": blog.uid,
+        #     "image": f"{blog.main_image}" if blog.main_image else "",
+        #     "title": blog.title,
+        #     "post_link": str(blog.uid),
+        #     "tag_link": blog.tags,
+        #     "tag": blog.tags,
+        #     "date": blog.created_at.strftime("%d %B"),  # Format date as needed
+        #     "votes": 0,  # You may adjust this based on your logic
+        #     "user_username": user_serializer.data['username'],  # Include only the username field
+        # }
 
-        return Response(response_data)
+        # return Response(response_data)
         
     # 
         
