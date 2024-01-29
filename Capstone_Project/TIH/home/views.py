@@ -36,7 +36,7 @@ class BlogView(APIView):
             for blog in blogs:
                 blog_data = {
                     "id": blog.uid,
-                    "image": f"url({blog.main_image})" if blog.main_image else "",
+                    "image": f"{blog.main_image}" if blog.main_image else "",
                     "title": blog.title,
                     "post_link": str(blog.uid),
                     "tag_link": blog.tags,
@@ -281,7 +281,7 @@ class BlogByTagView(ListAPIView):
         for blog in blogs:
             blog_data = {
                 "id": blog.uid,
-                "image": f"url({blog.main_image})" if blog.main_image else "",
+                "image": f"{blog.main_image}" if blog.main_image else "",
                 "title": blog.title,
                 "post_link": str(blog.uid),
                 "tag_link": blog.tags,
@@ -386,7 +386,7 @@ class BlogDetailView(APIView):
             # Construct the response in the desired format
         response_data = {
             "id": blog.uid,
-            "image": f"url({blog.main_image})" if blog.main_image else "",
+            "image": f"{blog.main_image}" if blog.main_image else "",
             "title": blog.title,
             "post_link": str(blog.uid),
             "tag_link": blog.tags,
