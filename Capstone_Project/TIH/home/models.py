@@ -69,7 +69,8 @@ class Blog(BaseModel):
     # video = models.FileField(upload_to="blogs", null=True, blank=True)
     tags = models.TextField(max_length=255)
     comments = models.ManyToManyField(Comment, related_name='blog_comments', blank=True)
-    votes = models.IntegerField(null = True)
+    # votes = models.IntegerField(null = True)
+    upvotes = models.IntegerField(default=0)
 
     def __str__(self):
         return self.title

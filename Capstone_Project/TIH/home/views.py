@@ -22,16 +22,106 @@ import traceback
 
 
 class BlogView(APIView):
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+
+    # def get(self, request, *args, **kwargs):
+    #     try:
+    #         blogs = Blog.objects.all()
+
+    #         blogs = Blog.objects.all()
+
+    #     # Construct the response for each blog in the desired format
+    #         blogs_data = []
+    #         for blog in blogs:
+    #             blog_data = {
+    #                 "id": blog.uid,
+    #                 "image": f"{blog.main_image}" if blog.main_image else "",
+    #                 "title": blog.title,
+    #                 "post_link": str(blog.uid),
+    #                 "tag_link": blog.tags,
+    #                 "tag": blog.tags,
+    #                 "date": blog.created_at.strftime("%d %B"),  # Format date as needed
+    #                 "votes": 0,  # You may adjust this based on your logic
+    #                 "user_username": blog.user.username if blog.user else "",
+    #             }
+    #             blogs_data.append(blog_data)    
+
+    #         blogs = Blog.objects.all()
+
+    #         # If search parameter is provided, apply the filter
+    #         if request.GET.get('search'):
+    #             search = request.GET.get('search')
+    #             search_terms = [term.strip() for term in search.split('$')]
+
+    #             # Construct a single condition using the logical OR operator
+    #             conditions = Q()
+    #             for term in search_terms:
+    #                 conditions |= Q(title__icontains=term) | Q(user__username__icontains=term) | Q(blog_text__icontains=term)
+
+    #             # Apply the constructed condition to filter the queryset
+    #             blogs = blogs.filter(conditions)
+
+    #         # Sort the queryset by a specific field, for example, 'created_at'
+    #         blogs = blogs.order_by('created_at')
+
+
+    #         search_blogs_data = []
+    #         for blog in blogs:
+    #             search_blog_data = {
+    #                 "id": blog.uid,
+    #                 "image": f"{blog.main_image}" if blog.main_image else "",
+    #                 "title": blog.title,
+    #                 "post_link": str(blog.uid),
+    #                 "tag_link": blog.tags,
+    #                 "tag": blog.tags,
+    #                 "date": blog.created_at.strftime("%d %B"),  # Format date as needed
+    #                 "votes": 0,  # You may adjust this based on your logic
+    #                 "user_username": blog.user.username if blog.user else "",
+    #             }
+    #             search_blogs_data.append(search_blog_data)
+
+    #         # Include the filtered blogs data in the main blogs_data
+    #         blogs_data += search_blogs_data
+
+
+    #         # Print the count of filtered blogs
+    #         print(blogs.count())
+
+    #         # Paginate the blogs
+    #         page_number = request.GET.get('page', 1)
+    #         paginator = Paginator(blogs, 5)
+
+    #         try:
+    #             paginated_blogs = paginator.page(page_number)
+    #         except Exception as e:
+    #             print(e)
+    #             paginated_blogs = paginator.page(paginator.num_pages)
+
+    #         # Serialize the paginated blogs
+    #         serializer = BlogSerializer(paginated_blogs, many=True)
+
+    #         # Return the response
+    #         return Response({
+    #             'data': blogs_data,
+    #             'message': 'Blogs fetched successfully'
+    #         }, status=status.HTTP_200_OK)
+    #     except Exception as e:
+    #         print(e)
+    #         return Response({
+    #             'data': [],
+    #             'message': 'Something went wrong'
+    #         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
     def get(self, request, *args, **kwargs):
         try:
+            # Fetch all blogs
             blogs = Blog.objects.all()
 
-            blogs = Blog.objects.all()
-
-        # Construct the response for each blog in the desired format
+            # Construct the response for each blog in the desired format
             blogs_data = []
             for blog in blogs:
                 blog_data = {
@@ -47,40 +137,61 @@ class BlogView(APIView):
                 }
                 blogs_data.append(blog_data)
 
+            # Fetch all blogs again for applying search conditions
+            blogs = Blog.objects.all()
 
-
-
+            # If search parameter is provided, apply the filter
             if request.GET.get('search'):
                 search = request.GET.get('search')
                 search_terms = [term.strip() for term in search.split('$')]
-                print(search)
-                print(search_terms)
 
-                # Construct a dynamic Q object to combine multiple conditions
+                # Construct a single condition using the logical OR operator
                 conditions = Q()
                 for term in search_terms:
-                    conditions |= Q(title__icontains=term) | Q(user__username__icontains=term) | Q(blog_text__icontains=term) 
+                    conditions |= Q(title__icontains=term) | Q(user__username__icontains=term) | Q(blog_text__icontains=term)
 
-                # Apply the constructed conditions to filter the queryset
+                # Apply the constructed condition to filter the queryset
                 blogs = blogs.filter(conditions)
+
+                # Construct the response for each filtered blog in the desired format
+                blogs_data = []
+                for blog in blogs:
+                    search_blog_data = {
+                        "id": blog.uid,
+                        "image": f"{blog.main_image}" if blog.main_image else "",
+                        "title": blog.title,
+                        "post_link": str(blog.uid),
+                        "tag_link": blog.tags,
+                        "tag": blog.tags,
+                        "date": blog.created_at.strftime("%d %B"),  # Format date as needed
+                        "votes": blog.upvotes,  # You may adjust this based on your logic
+                        "user_username": blog.user.username if blog.user else "",
+                    }
+                    blogs_data.append(search_blog_data)
+                
+
+                # Include the filtered blogs data in the main blogs_data
+                # blogs_data += blogs_data
 
             # Sort the queryset by a specific field, for example, 'created_at'
             blogs = blogs.order_by('created_at')
 
-            page_number = request.GET.get('page', 1)
-            paginator = Paginator(blogs, 5)
-            
-            try:
-                paginated_blogs = paginator.page(page_number)
+            # Print the count of filtered blogs
+            print(blogs.count())
 
+            # Paginate the blogs_data
+            page_number = request.GET.get('page', 1)
+            paginator = Paginator(blogs_data, 5)
+
+            try:
+                paginated_blogs_data = paginator.page(page_number)
             except Exception as e:
                 print(e)
-                paginated_blogs = paginator.page(paginator.num_pages)
+                paginated_blogs_data = paginator.page(paginator.num_pages)
 
-            serializer = BlogSerializer(paginated_blogs, many=True)
-
+            # Return the response with paginated blogs_data
             return Response({
-                'data': blogs_data,
+                'data': paginated_blogs_data.object_list,  # Use object_list to get the paginated data
                 'message': 'Blogs fetched successfully'
             }, status=status.HTTP_200_OK)
 
@@ -90,9 +201,6 @@ class BlogView(APIView):
                 'data': [],
                 'message': 'Something went wrong'
             }, status=status.HTTP_400_BAD_REQUEST)
-
-
-
 
 
     def post(self, request):
@@ -472,3 +580,15 @@ class CommentViewSet(viewsets.ModelViewSet):
 
         reply_serializer = ReplySerializer(reply)
         return Response({'reply': reply_serializer.data}, status=201)
+    
+
+
+class UpvoteBlogView(APIView):
+    def post(self, request, blog_id):
+        try:
+            blog = Blog.objects.get(uid=blog_id)
+            blog.upvotes += 1
+            blog.save()
+            return Response({'message': 'Upvoted successfully'}, status=status.HTTP_200_OK)
+        except Blog.DoesNotExist:
+            return Response({'message': 'Blog not found'}, status=status.HTTP_404_NOT_FOUND)

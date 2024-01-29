@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from .views import BlogView, CommentViewSet,MyBlogsView,BlogByTagView,BlogListView,BlogDetailView
+from .views import BlogView, CommentViewSet,MyBlogsView,BlogByTagView,BlogListView,BlogDetailView,UpvoteBlogView
 # from .views import CommentViewSet, add_reply
 
 
@@ -22,5 +22,9 @@ urlpatterns = [
     # path('blog/comments/<uuid:pk>/', CommentViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='comment-detail'),
 
     path('blog/comments/<uuid:pk>/add_reply/', CommentViewSet.as_view({'post': 'add_reply'}), name='add-reply'),
+
+
+    path('blog/<uuid:blog_id>/upvote/', UpvoteBlogView.as_view(), name='upvote_blog'),
+
 
  ]  
