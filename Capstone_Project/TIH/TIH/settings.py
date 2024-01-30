@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-0i3*j%e^_mxm_=@$5$n%jti4_!*z5&12t1jz&a-bfxkn5vzi7q
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
 
@@ -80,9 +80,8 @@ EMAIL_HOST_PASSWORD = 'vcdl vzmt ulbe hobq'
 #   ]
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "http://13.53.47.73",
-      "http://13.53.47.73:5000",
-    "https://*",
+    "https://0.0.0.0",
+    "http://0.0.0.0."
 ]
 
 ROOT_URLCONF = 'TIH.urls'
@@ -129,18 +128,27 @@ WSGI_APPLICATION = 'TIH.wsgi.application'
 #         'NAME': 'tih',
 #     }
 # }
+
+
+
+import os
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.mysql"),
+        "NAME": os.environ.get("DB_NAME", "django_testing"),
+        "USER": os.environ.get("DB_USER", "admin"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", "admin"),
+        "HOST": os.environ.get("DB_HOST", "mysql"),
+        "PORT": os.environ.get("DB_PORT", "3306"),
     }
 }
 
-
-
-
-
-
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 # DATABASES = {
 # "default": {
