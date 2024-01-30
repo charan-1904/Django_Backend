@@ -94,25 +94,25 @@ class LoginSerializer(serializers.Serializer):
         if not user:
             return {'message': 'User not found', 'data': {}}
 
-        # refresh = RefreshToken.for_user(user)
+        refresh = RefreshToken.for_user(user)
 
-        # return {
-        #     'message': 'Login success',
-        #     'data': {'token': {'refresh': str(refresh), 'access': str(refresh.access_token)}}
-        # }
-
-        access_token = RefreshToken.for_user(user).access_token
-        expires_at = timezone.now() + timezone.timedelta(seconds=3600)
         return {
-            "message": "Login success",
-            "data": {
-                "token": {
-                    "access": str(access_token),  # Convert to string
-                    "expires_at": expires_at.timestamp(),  # Include expiration timestamp
-                }
-            }
+            'message': 'Login success',
+            'data': {'token': {'refresh': str(refresh), 'access': str(refresh.access_token)}}
         }
-        # return JsonResponse(response_data)
+
+        # access_token = RefreshToken.for_user(user).access_token
+        # expires_at = timezone.now() + timezone.timedelta(hours=1)
+        # return {
+        #     "message": "Login success",
+        #     "data": {
+        #         "token": {
+        #             "access": str(access_token),  # Convert to string
+        #             "expires_at": expires_at.timestamp(),  # Include expiration timestamp
+        #         }
+        #     }
+        # }
+        return JsonResponse(response_data)
 
 
 

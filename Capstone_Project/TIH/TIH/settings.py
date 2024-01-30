@@ -51,17 +51,20 @@ INSTALLED_APPS = [
     'home'
 ]
 
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware'
-
 ]
+
+
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
@@ -81,7 +84,9 @@ EMAIL_HOST_PASSWORD = 'vcdl vzmt ulbe hobq'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://0.0.0.0",
-    "http://0.0.0.0."
+    "http://0.0.0.0.",
+    "http://*",
+    "http://localhost:3000"
 ]
 
 ROOT_URLCONF = 'TIH.urls'
@@ -108,7 +113,14 @@ WSGI_APPLICATION = 'TIH.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
+# Set a session timeout (in seconds). Adjust according to your needs.
+# For example, 1209600 seconds is two weeks.
+SESSION_COOKIE_AGE = 60
+
+# Set the session cookie name. You can customize it if needed.
+# SESSION_COOKIE_NAME = 'your_session_cookie_name'
 
 # DATABASES = {
 #     'default':{
