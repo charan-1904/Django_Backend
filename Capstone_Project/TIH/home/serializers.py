@@ -45,3 +45,12 @@ class BlogDSerializer(serializers.ModelSerializer):
     class Meta:
         model = Blog
         fields = '__all__'
+
+
+
+class ContactFormSerializer(serializers.Serializer):
+    user_username = serializers.ReadOnlyField(source='user.username')
+
+    name = serializers.CharField(max_length=100)
+    email = serializers.EmailField()
+    message = serializers.CharField(max_length=500)

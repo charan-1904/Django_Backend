@@ -44,58 +44,6 @@ from django.shortcuts import render
 CustomUser = get_user_model()
 
 
-# class LoginView(APIView):
-#     def post(self, request):
-#         try:
-#             data = request.data
-#             serializer = LoginSerializer(data=data)
-
-#             if serializer.is_valid():
-#                 response = serializer.get_jwt_token(serializer.validated_data)
-#                 return Response(response, status=status.HTTP_200_OK)
-#             else:
-#                 return Response({
-#                     'data': serializer.errors,
-#                     'message': 'Something went wrong'
-#                 }, status=status.HTTP_400_BAD_REQUEST)
-
-#         except Exception as e:
-#             print(e)
-#             return Response({
-#                 'data': {},
-#                 'message': 'Internal Server Error'
-#             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-#     def forgot_password(request):
-#         if request.method == 'POST':
-#             email = request.POST.get('email', '')
-#             user = CustomUser.objects.filter(email=email).first()
-    
-#             if user:
-#                 # Generate a unique token and save it to the user model
-#                 token = get_random_string(length=32)
-#                 user.reset_password_token = token
-#                 user.save()
-    
-#                 # Send the password reset email with the token
-#                 reset_link = f"http://127.0.0.1:8000/accounts/reset_password/{token}/"
-    
-#                 send_mail(
-#                     'Reset Password',
-#                     f'Click the following link to reset your password: {reset_link}',
-#                     settings.DEFAULT_FROM_EMAIL,
-#                     [user.email],
-#                     fail_silently=False,
-#                 )
-#                 return Response({'message': 'reset successful'}, status=status.HTTP_200_OK)
-    
-#             else:
-#                 error_message = "No user found with this email address."
-#                 return Response({'message': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-#         return Response({'message': 'reset successful'}, status=status.HTTP_200_OK)
-
-
 class LoginView(APIView):
     def post(self, request):
         try:
@@ -117,6 +65,58 @@ class LoginView(APIView):
                 'data': {},
                 'message': 'Internal Server Error'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    def forgot_password(request):
+        if request.method == 'POST':
+            email = request.POST.get('email', '')
+            user = CustomUser.objects.filter(email=email).first()
+    
+            if user:
+                # Generate a unique token and save it to the user model
+                token = get_random_string(length=32)
+                user.reset_password_token = token
+                user.save()
+    
+                # Send the password reset email with the token
+                reset_link = f"http://127.0.0.1:8000/accounts/reset_password/{token}/"
+    
+                send_mail(
+                    'Reset Password',
+                    f'Click the following link to reset your password: {reset_link}',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],
+                    fail_silently=False,
+                )
+                return Response({'message': 'reset successful'}, status=status.HTTP_200_OK)
+    
+            else:
+                error_message = "No user found with this email address."
+                return Response({'message': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+        return Response({'message': 'reset successful'}, status=status.HTTP_200_OK)
+
+
+# class LoginView(APIView):
+#     def post(self, request):
+#         try:
+#             data = request.data
+#             serializer = LoginSerializer(data=data)
+
+#             if serializer.is_valid():
+#                 response = serializer.get_jwt_token(serializer.validated_data)
+#                 return Response(response, status=status.HTTP_200_OK)
+#             else:
+#                 return Response({
+#                     'data': serializer.errors,
+#                     'message': 'Something went wrong'
+#                 }, status=status.HTTP_400_BAD_REQUEST)
+
+#         except Exception as e:
+#             print(e)
+#             return Response({
+#                 'data': {},
+#                 'message': 'Internal Server Error'
+#             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     
 # class LogoutView(APIView):
@@ -178,3 +178,70 @@ class ForgotPasswordView(APIView):
         else:
             return Response({'error_message': 'No user found with this email address.'}, status=status.HTTP_404_NOT_FOUND)
 
+
+
+# import jwt,datetime
+
+# class LoginView(APIView):
+#     def post(self, request):
+#         employee_id = request.data['employee_id']
+#         password = request.data['password']
+
+
+#         user = CustomUser.objects.filter(employee_id=employee_id).first()
+
+#         if user is None:
+#             return AuthenticationFailed("User not found!")
+        
+#         if not user.check_password(password):
+#             return AuthenticationFailed("Invalid password!")
+
+#         payload = {
+#             "id" : user.id,
+#             "exp" : datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
+#             "iat" : datetime.datetime.utcnow()
+#         }
+
+#         token = jwt.encode(payload, 'secret', algorithm='HS256')
+#         response = Response()
+
+#         response.set_cookie(key="jwt", value=token, httponly=True)
+#         response.data = {
+#             "access" : token
+#         }
+
+#         return response
+
+
+# class LoginView(APIView):
+#     def post(self, request):
+#         employee_id = request.data['employee_id']
+#         password = request.data['password']
+
+#         user = CustomUser.objects.filter(employee_id=employee_id).first()
+
+#         if user is None:
+#             return AuthenticationFailed("User not found!")
+
+#         if not user.check_password(password):
+#             return AuthenticationFailed("Invalid password!")
+
+#         payload = {
+#             "id": user.id,
+#             "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
+#             "iat": datetime.datetime.utcnow(),
+#         }
+
+#         token = jwt.encode(payload, 'secret', algorithm='HS256')
+#         response = Response()
+#         response.data = {"access": token, "token_type": "Bearer"}  # Include token_type as Bearer
+#         return response
+
+# class LogoutView(APIView):
+#     def post(self, request):
+#         response = Response()
+#         response.delete_cookie('jwt')
+#         response.data = ({
+#             'message' : "success"
+#         })
+#         return response

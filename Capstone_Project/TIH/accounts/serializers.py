@@ -1,4 +1,4 @@
-from datetime import timezone
+from datetime import timedelta, timezone
 from django.http import JsonResponse
 from rest_framework import serializers
 from django.contrib.auth.models import User
@@ -88,18 +88,18 @@ class LoginSerializer(serializers.Serializer):
         return data
 
 
-    def get_jwt_token(self, data):
-        user = CustomUser.objects.filter(employee_id=data['employee_id']).first()
+    # def get_jwt_token(self, data):
+    #     user = CustomUser.objects.filter(employee_id=data['employee_id']).first()
 
-        if not user:
-            return {'message': 'User not found', 'data': {}}
+    #     if not user:
+    #         return {'message': 'User not found', 'data': {}}
 
-        refresh = RefreshToken.for_user(user)
+    #     refresh = RefreshToken.for_user(user)
 
-        return {
-            'message': 'Login success',
-            'data': {'token': {'refresh': str(refresh), 'access': str(refresh.access_token)}}
-        }
+    #     return {
+    #         'message': 'Login success',
+    #         'data': {'token': {'refresh': str(refresh), 'access': str(refresh.access_token)}}
+    #     }
 
         # access_token = RefreshToken.for_user(user).access_token
         # expires_at = timezone.now() + timezone.timedelta(hours=1)
@@ -112,9 +112,24 @@ class LoginSerializer(serializers.Serializer):
         #         }
         #     }
         # }
-        return JsonResponse(response_data)
+        # return JsonResponse(response_data)
 
 
+    def get_jwt_token(self, data):
+        user = CustomUser.objects.filter(employee_id=data['employee_id']).first()
 
+        if not user:
+            return {'message': 'User not found', 'data': {}}
+
+        refresh = RefreshToken.for_user(user)
+
+        # Set a custom expiration time for the access token (e.g., 7 days)
+        access_token_lifetime = timedelta(days=7)
+        refresh.access_token.set_exp(access_token_lifetime)
+
+        return {
+            'message': 'Login success',
+            'data': {'token': {'refresh': str(refresh), 'access': str(refresh.access_token)}}
+        }
 
 

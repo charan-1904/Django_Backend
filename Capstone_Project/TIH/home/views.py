@@ -22,8 +22,8 @@ import traceback
 
 
 class BlogView(APIView):
-    # permission_classes = [IsAuthenticated]
-    # authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     # def get(self, request, *args, **kwargs):
     #     try:
@@ -594,3 +594,33 @@ class UpvoteBlogView(APIView):
             return Response({'message': 'Upvoted successfully'}, status=status.HTTP_200_OK)
         except Blog.DoesNotExist:
             return Response({'message': 'Blog not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+
+
+
+from .serializers import ContactFormSerializer
+from django.core.mail import send_mail
+
+
+class ContactFormView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = ContactFormSerializer(data=request.data)
+        if serializer.is_valid():
+            # Process the form data
+            name = serializer.validated_data['name']
+            email = serializer.validated_data['email']
+            message = serializer.validated_data['message']
+            user = request.user 
+
+            # Perform actions, e.g., send an email
+            send_mail(
+                f"New Contact Form Submission from {name}",
+                f"From: {name}\nEmail: {email}\nMessage: {message}\nUser: {user}",
+                'scharan621@gmail.com',  # Replace with your email
+                ['scharan621@gmail.com'],  # Replace with the recipient's email
+                fail_silently=False,
+            )
+
+            return Response({'message': 'Form submitted successfully'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
