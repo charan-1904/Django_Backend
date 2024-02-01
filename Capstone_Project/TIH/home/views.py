@@ -457,18 +457,22 @@ class MyBlogsView(APIView):
 
 
 from rest_framework.generics import ListAPIView
-class BlogByTagView(ListAPIView):
-    serializer_class = BlogTSerializer
+# class BlogByTagView(ListAPIView):
+#     serializer_class = BlogTSerializer
     
-    def get_queryset(self):
-        tag_name = self.kwargs.get('tag_name')
+#     def get_queryset(self):
+#         tag_name = self.kwargs.get('tag_name')
         
-        if tag_name:
-            # Filter the queryset based on the tag_name
-            return Blog.objects.filter(tags__icontains=tag_name)
-        else:
-            # Return all blogs if no tag_name is provided
-            return Blog.objects.all()
+#         if tag_name:
+#             blog = Blog.objects.filter(tags__iexact=tag_name)
+#             # Filter the queryset based on the tag_name
+#             return Response({
+#                 'data': blog,
+#                 'meessage' : "Blogs fetched successfully"
+#             }, status=status.HTTP_200_OK)
+#         else:
+#             # Return all blogs if no tag_name is provided
+#             return Blog.objects.all()
         
         # blogs_data = []
         # for blog in blogs:
@@ -487,7 +491,41 @@ class BlogByTagView(ListAPIView):
         #     return blogs_data
 
 
+class BlogByTagView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    serializer_class = BlogTSerializer
+    
+    def get_queryset(self):
+        tag_name = self.kwargs.get('tag_name')
 
+        if not tag_name:
+            # If tag_name is not provided, return a custom response
+            return Blog.objects.none()  # or return an empty queryset
+
+        queryset = Blog.objects.filter(tags__iexact=tag_name)
+
+        # Check if the user is authorized (replace this with your authorization logic)
+        # if not self.request.user.is_authorized:
+        #     return Blog.objects.none()  # or return an empty queryset
+
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        if not queryset.exists():
+            # Return a custom response if the queryset is empty
+            return Response({
+                'data': {},
+                'message': 'You are not authorized to do this or the tag name is not provided',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            'data': serializer.data,
+            'message': 'Blogs fetched successfully',
+        }, status=status.HTTP_200_OK)
 
 
 class BlogListView(APIView):
