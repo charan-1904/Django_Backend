@@ -233,7 +233,7 @@ class BlogView(APIView):
                 # Construct a single condition using the logical OR operator
                 conditions = Q()
                 for term in search_terms:
-                    conditions |= Q(title__icontains=term) | Q(user__username__icontains=term) | Q(blog_text__icontains=term)
+                    conditions |= Q(title__icontains=term) | Q(user__username__icontains=term) | Q(summary__icontains=term)
 
                 # Apply the constructed condition to filter the queryset
                 blogs = blogs.filter(conditions)
@@ -427,7 +427,7 @@ class MyBlogsView(APIView):
                 search = request.GET.get('search')
                 blogs = blogs.filter(
                     Q(title__icontains=search) | 
-                    Q(blog_text__icontains=search) | 
+                    Q(summary__icontains=search) | 
                     Q(user__username__icontains=search)
                 )
 
@@ -786,7 +786,7 @@ class UserBlogsView(APIView):
                 # Construct a single condition using the logical OR operator
                 conditions = Q()
                 for term in search_terms:
-                    conditions |= Q(title__icontains=term) | Q(user__username__icontains=term) | Q(blog_text__icontains=term)
+                    conditions |= Q(title__icontains=term) | Q(user__username__icontains=term) | Q(summary__icontains=term)
 
                 # Apply the constructed condition to filter the queryset
                 blogs = blogs.filter(conditions)
