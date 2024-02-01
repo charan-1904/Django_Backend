@@ -436,11 +436,13 @@ class MyBlogsView(APIView):
 
             # Validate the serializer
             serializer.is_valid()
-            usernames = [blog['user_username'] for blog in serializer.data]
+            # usernames = [blog['user_username'] for blog in serializer.data]
+            unique_usernames = set(blog.user.username for blog in blogs)
+
                         # usernames = [blog['user_username'] for blog in serializer.data]
 
             # Convert usernames list to a single string if needed
-            usernames_str = ', '.join(usernames)
+            usernames_str = ', '.join(unique_usernames)
 
 
             return Response({
