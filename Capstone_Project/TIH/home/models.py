@@ -42,7 +42,7 @@ class Tag(models.Model):
 
 class Comment(BaseModel):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='comments')
-    text = models.TextField()
+    add_comment = models.TextField()
     # parent_comment = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
 
     def __str__(self):
@@ -55,7 +55,7 @@ class Reply(BaseModel):
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='replies')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)  
 
-    text = models.TextField()
+    add_reply = models.TextField()
 
     def __str__(self):
         return f"Reply to {self.comment} - {self.text[:20]}"
@@ -74,5 +74,8 @@ class Blog(BaseModel):
 
     def __str__(self):
         return self.title
+
+
+
 
 

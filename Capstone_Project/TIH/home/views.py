@@ -415,33 +415,45 @@ class BlogView(APIView):
                     'message' : 'something went wrong'
                 }, status = status.HTTP_400_BAD_REQUEST) 
         
-
 class MyBlogsView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
+
     def get(self, request):
         try:
-            blogs = Blog.objects.filter(user = request.user)
+            blogs = Blog.objects.filter(user=request.user)
+
             if request.GET.get('search'):
                 search = request.GET.get('search')
-                # blogs = blogs.filter(Q(title__icontains = search) | Q(blog_text__icontains = search) | Q(username__icontains = search))
                 blogs = blogs.filter(
-    Q(title__icontains=search) | 
-    Q(blog_text__icontains=search) | 
-    Q(user__username__icontains=search)
-)
-            serializer = BlogSerializer(blogs, many = True)
+                    Q(title__icontains=search) | 
+                    Q(blog_text__icontains=search) | 
+                    Q(user__username__icontains=search)
+                )
+
+            # Instantiate the serializer with the request data
+            serializer = BlogSerializer(data=blogs, many=True)
+
+            # Validate the serializer
+            serializer.is_valid()
+            usernames = [blog['user_username'] for blog in serializer.data]
+                        # usernames = [blog['user_username'] for blog in serializer.data]
+
+            # Convert usernames list to a single string if needed
+            usernames_str = ', '.join(usernames)
+
+
             return Response({
-                'data' : serializer.data,
-                'message' : 'blogs fetched successfully'
-            },status = status.HTTP_201_CREATED)
+                'username': usernames_str,
+                'data': serializer.data,
+                'message': 'Blogs fetched successfully'
+            }, status=status.HTTP_200_OK)
+
         except Exception as e:
-             
-             print(e)
-             return Response({
-                    'data' : serializer.errors,
-                    'message' : 'something went wrong'
-                }, status = status.HTTP_400_BAD_REQUEST)  
+            print(e)
+            return Response({
+                'message': 'Something went wrong'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
 from rest_framework.generics import ListAPIView
@@ -533,16 +545,100 @@ class CustomUserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = '__all__'
 
+# class BlogDetailView(APIView):
+#     def get(self, request, *args, **kwargs):
+#         uid = kwargs.get('uid')
+        
+
+
+#         try:
+#             blog = get_object_or_404(Blog, uid=uid)
+#             serializer = BlogDSerializer(blog)
+            
+#             return Response({
+#                 'data': serializer.data,
+#                 'message': 'Blog fetched successfully'
+#             }, status=status.HTTP_200_OK)
+
+#         except Exception as e:
+#             print(e)
+#             return Response({
+#                 'data': [],
+#                 'message': 'Something went wrong'
+#             }, status=status.HTTP_400_BAD_REQUEST)
+
+#         # blog = Blog.objects.get(uid=uid)
+#         # user_serializer = CustomUserSerializer(blog.user)
+
+#         #     # Construct the response in the desired format
+#         # response_data = {
+#         #     "id": blog.uid,
+#         #     "image": f"{blog.main_image}" if blog.main_image else "",
+#         #     "title": blog.title,
+#         #     "post_link": str(blog.uid),
+#         #     "tag_link": blog.tags,
+#         #     "tag": blog.tags,
+#         #     "date": blog.created_at.strftime("%d %B"),  # Format date as needed
+#         #     "votes": 0,  # You may adjust this based on your logic
+#         #     "user_username": user_serializer.data['username'],  # Include only the username field
+#         # }
+
+#         # return Response(response_data)
+        
+#     # 
+        
+#     def post(self, request, *args, **kwargs):
+#         uid = kwargs.get('uid')
+
+#         try:
+#             blog = get_object_or_404(Blog, uid=uid)
+#             user = request.user  # Assuming the user is authenticated
+
+#             # Extract comment data from the request
+#             comment_text = request.data.get('text')
+#             parent_comment_id = request.data.get('parent_comment_id')
+
+#             # Create a new comment instance
+#             comment = Comment.objects.create(user=user, text=comment_text)
+
+#             # If it's a reply, create a new reply instance
+#             if parent_comment_id:
+#                 parent_comment = get_object_or_404(Comment, uid=parent_comment_id)
+#                 reply_text = request.data.get('text')  # Extract reply text
+#                 reply = Reply.objects.create(comment=parent_comment, text=reply_text)
+
+#             # Add the comment to the blog's comments
+#             blog.comments.add(comment)
+
+#             # Serialize the updated blog
+#             serializer = BlogDSerializer(blog)
+
+#             return Response({
+#                 'data': serializer.data,
+#                 'message': 'Comment posted successfully'
+#             }, status=status.HTTP_201_CREATED)
+
+#         except Exception as e:
+#             print(e)
+#             return Response({
+#                 'data': [],
+#                 'message': 'Something went wrong'
+#             }, status=status.HTTP_400_BAD_REQUEST)
+        
+
+from django.contrib.auth import get_user_model
+
+
+CustomUser = get_user_model()
+
 class BlogDetailView(APIView):
     def get(self, request, *args, **kwargs):
         uid = kwargs.get('uid')
-        
-
 
         try:
             blog = get_object_or_404(Blog, uid=uid)
             serializer = BlogDSerializer(blog)
-            
+
             return Response({
                 'data': serializer.data,
                 'message': 'Blog fetched successfully'
@@ -555,26 +651,6 @@ class BlogDetailView(APIView):
                 'message': 'Something went wrong'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        # blog = Blog.objects.get(uid=uid)
-        # user_serializer = CustomUserSerializer(blog.user)
-
-        #     # Construct the response in the desired format
-        # response_data = {
-        #     "id": blog.uid,
-        #     "image": f"{blog.main_image}" if blog.main_image else "",
-        #     "title": blog.title,
-        #     "post_link": str(blog.uid),
-        #     "tag_link": blog.tags,
-        #     "tag": blog.tags,
-        #     "date": blog.created_at.strftime("%d %B"),  # Format date as needed
-        #     "votes": 0,  # You may adjust this based on your logic
-        #     "user_username": user_serializer.data['username'],  # Include only the username field
-        # }
-
-        # return Response(response_data)
-        
-    # 
-        
     def post(self, request, *args, **kwargs):
         uid = kwargs.get('uid')
 
@@ -583,17 +659,17 @@ class BlogDetailView(APIView):
             user = request.user  # Assuming the user is authenticated
 
             # Extract comment data from the request
-            comment_text = request.data.get('text')
+            comment_text = request.data.get('add_comment')
             parent_comment_id = request.data.get('parent_comment_id')
 
             # Create a new comment instance
-            comment = Comment.objects.create(user=user, text=comment_text)
+            comment = Comment.objects.create(user=user, add_comment=comment_text)
 
             # If it's a reply, create a new reply instance
             if parent_comment_id:
                 parent_comment = get_object_or_404(Comment, uid=parent_comment_id)
-                reply_text = request.data.get('text')  # Extract reply text
-                reply = Reply.objects.create(comment=parent_comment, text=reply_text)
+                reply_text = request.data.get('add_reply')  # Extract reply text
+                reply = Reply.objects.create(comment=parent_comment, user=user, add_reply=reply_text)
 
             # Add the comment to the blog's comments
             blog.comments.add(comment)
@@ -637,13 +713,13 @@ class CommentViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def add_reply(self, request, pk=None):
         comment = self.get_object()
-        reply_text = request.data.get('text', '')
+        reply_text = request.data.get('add_reply', '')
 
         # Assuming you have access to the user making the reply, you can get it from the request
         user = request.user
 
         # Create the Reply instance with the user
-        reply = Reply.objects.create(comment=comment, user=user, text=reply_text)
+        reply = Reply.objects.create(comment=comment, user=user, add_reply=reply_text)
 
         reply_serializer = ReplySerializer(reply)
         return Response({'reply': reply_serializer.data}, status=201)
@@ -689,3 +765,69 @@ class ContactFormView(APIView):
             return Response({'message': 'Form submitted successfully'}, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
+        
+
+
+class UserBlogsView(APIView):
+    def get(self, request, *args, **kwargs):
+        try:
+            # Fetch user based on the provided username
+            username = self.kwargs.get('username')
+            user = get_object_or_404(CustomUser, username=username)
+
+            # Fetch blogs related to the user
+            blogs = Blog.objects.filter(user=user)
+
+            # If search parameter is provided, apply the filter
+            if request.GET.get('search'):
+                search = request.GET.get('search')
+                search_terms = [term.strip() for term in search.split('$')]
+
+                # Construct a single condition using the logical OR operator
+                conditions = Q()
+                for term in search_terms:
+                    conditions |= Q(title__icontains=term) | Q(user__username__icontains=term) | Q(blog_text__icontains=term)
+
+                # Apply the constructed condition to filter the queryset
+                blogs = blogs.filter(conditions)
+
+            # Construct the response for each blog in the desired format
+            blogs_data = []
+            usernames = []
+            for blog in blogs:
+                blog_data = {
+                    "id": blog.uid,
+                    "image": f"{blog.main_image}" if blog.main_image else "",
+                    "title": blog.title,
+                    "post_link": str(blog.uid),
+                    "tag_link": blog.tags,
+                    "tag": blog.tags,
+                    "date": blog.created_at.strftime("%d %B %Y %H:%M"),
+                    "votes": 0,  # You may adjust this based on your logic
+                    "user_username": blog.user.username if blog.user else "",
+                }
+                blogs_data.append(blog_data)
+                usernames.append(blog_data['user_username'])  # Append username to the list
+
+
+            # Sort the blogs_data by date in descending order
+            blogs_data = sorted(blogs_data, key=lambda x: x['date'], reverse=True)
+            # usernames = [blog['user_username'] for blog in serializer.data]
+                        # usernames = [blog['user_username'] for blog in serializer.data]
+
+            # Convert usernames list to a single string if needed
+            usernames_str = ', '.join(usernames)
+
+            # Return the response with all blogs_data
+            return Response({
+                'username': blog_data['user_username'],
+                'data': blogs_data,
+                'message': 'Blogs fetched successfully'
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            print(e)
+            return Response({
+                'data': [],
+                'message': 'Something went wrong'
+            }, status=status.HTTP_400_BAD_REQUEST)

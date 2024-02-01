@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from .views import BlogView, CommentViewSet, ContactFormView,MyBlogsView,BlogByTagView,BlogListView,BlogDetailView,UpvoteBlogView
+from .views import BlogView, CommentViewSet, ContactFormView,MyBlogsView,BlogByTagView,BlogListView,BlogDetailView,UpvoteBlogView, UserBlogsView
 # from .views import CommentViewSet, add_reply
 
 
@@ -19,11 +19,14 @@ urlpatterns = [
     path('blog/tag/<str:tag_name>/', BlogByTagView.as_view(), name='blog-lisby-tag'),
 
 
+    # path('blog/<str:username>/', UserBlogsView.as_view(), name='user_blogs'),
 
     path('blog/comments/', CommentViewSet.as_view({'get': 'list', 'post': 'create'}), name='comment-list'),
     # path('blog/comments/<uuid:pk>/', CommentViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='comment-detail'),
 
-    path('blog/comments/<uuid:pk>/add_reply/', CommentViewSet.as_view({'post': 'add_reply'}), name='add-reply'),
+    path('blog/<uuid:pk>/add_reply/', CommentViewSet.as_view({'post': 'add_reply'}), name='add-reply'),
+    path('blog/<str:username>/', UserBlogsView.as_view(), name='user_blogs'),
+    path('user-blogs/<str:username>/', UserBlogsView.as_view(), name='user_blogs_by_user'),
 
 
     path('blog/<uuid:blog_id>/upvote/', UpvoteBlogView.as_view(), name='upvote_blog'),
