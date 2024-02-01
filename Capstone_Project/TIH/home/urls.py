@@ -15,7 +15,9 @@ urlpatterns = [
     path('blog/comments/<uuid:uid>/', BlogDetailView.as_view(), name='blog-detail'),
 
 
-    path('blog/tag/<str:tag_name>/', BlogListView.as_view(), name='blog-list-by-tag'),
+    # path('blog/tag/<str:tag_name>/', BlogListView.as_view(), name='blog-list-by-tag'),
+    path('blog/tag/<str:tag_name>/', BlogByTagView.as_view(), name='blog-lisby-tag'),
+
 
 
     path('blog/comments/', CommentViewSet.as_view({'get': 'list', 'post': 'create'}), name='comment-list'),

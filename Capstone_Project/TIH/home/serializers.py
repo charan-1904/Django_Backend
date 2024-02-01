@@ -39,6 +39,7 @@ class BlogSerializer(serializers.ModelSerializer):
 class BlogDSerializer(serializers.ModelSerializer):
     user_username = serializers.ReadOnlyField(source='user.username')
     comments = CommentSerializer(many=True, read_only=True)
+    
 
 
 
@@ -54,3 +55,22 @@ class ContactFormSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=100)
     email = serializers.EmailField()
     message = serializers.CharField(max_length=500)
+
+
+# class BlogTSerializer(serializers.ModelSerializer):
+class BlogTSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Blog
+        fields = ('uid', 'main_image', 'title', 'tags', 'upvotes', 'user')
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['id'] = representation.pop('uid')
+        representation['image'] = representation.pop('main_image', '')
+        representation['post_link'] = str(representation['id'])
+        # representation['tag_link'] = representation['tags']
+        # representation['tag'] = representation['tags']
+        representation['date'] = instance.created_at.strftime("%d %B %Y %H:%M")
+        representation['user_username'] = instance.user.username if instance.user else ''
+        return representation
+

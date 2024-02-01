@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 from accounts import serializers
 from accounts.models import CustomUser
-from .serializers import BlogDSerializer, BlogSerializer, CommentSerializer, ReplySerializer
+from .serializers import BlogDSerializer, BlogSerializer, BlogTSerializer, CommentSerializer, ReplySerializer
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import generics
@@ -445,38 +445,37 @@ class MyBlogsView(APIView):
 
 
 from rest_framework.generics import ListAPIView
-
 class BlogByTagView(ListAPIView):
-    serializer_class = BlogSerializer
+    serializer_class = BlogTSerializer
     
-
     def get_queryset(self):
         tag_name = self.kwargs.get('tag_name')
-        blogs_data = []
-        blogs = Blog.objects.all()
-        for blog in blogs:
-            blog_data = {
-                "id": blog.uid,
-                "image": f"{blog.main_image}" if blog.main_image else "",
-                "title": blog.title,
-                "post_link": str(blog.uid),
-                "tag_link": blog.tags,
-                "tag": blog.tags,
-                "date": blog.created_at.strftime("%d %B"),  # Format date as needed
-                "votes": 0,  # You may adjust this based on your logic
-                "user_username": blog.user.username if blog.user else "",
-            }
-            blogs_data.append(blog_data)
-
-
-
-
+        
         if tag_name:
-            return blogs_data.objects.filter(tags__name=tag_name)
+            # Filter the queryset based on the tag_name
+            return Blog.objects.filter(tags__icontains=tag_name)
         else:
-            return blogs_data.all()
+            # Return all blogs if no tag_name is provided
+            return Blog.objects.all()
+        
+        # blogs_data = []
+        # for blog in blogs:
+        #     search_blog_data = {
+        #         "id": blog.uid,
+        #         "image": f"{blog.main_image}" if blog.main_image else "",
+        #         "title": blog.title,
+        #         "post_link": str(blog.uid),
+        #         "tag_link": blog.tags,
+        #         "tag": blog.tags,
+        #         "date": blog.created_at.strftime("%d %B"),  # Format date as needed
+        #         "votes": blog.upvotes,  # You may adjust this based on your logic
+        #         "user_username": blog.user.username if blog.user else "",
+        #     }
+        #     blogs_data.append(search_blog_data)
+        #     return blogs_data
 
-# 
+
+
 
 
 class BlogListView(APIView):
