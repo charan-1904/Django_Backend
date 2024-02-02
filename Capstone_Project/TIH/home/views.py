@@ -703,7 +703,7 @@ class BlogDetailView(APIView):
             parent_comment_id = request.data.get('parent_comment_id')
 
             # Create a new comment instance
-            comment = Comment.objects.create(user=user, add_comment=comment_text)
+            comment = Comment.objects.create(user=user, add_comment=comment_text, )
 
             # If it's a reply, create a new reply instance
             if parent_comment_id:
@@ -728,6 +728,59 @@ class BlogDetailView(APIView):
                 'data': [],
                 'message': 'Something went wrong'
             }, status=status.HTTP_400_BAD_REQUEST)
+        
+
+
+# from django.contrib.auth.models import AnonymousUser
+
+# class BlogDetailView(APIView):
+#     def post(self, request, *args, **kwargs):
+#         uid = kwargs.get('uid')
+
+#         try:
+#             blog = get_object_or_404(Blog, uid=uid)
+
+#             # Check if the user is authenticated
+#             if request.user and not isinstance(request.user, AnonymousUser):
+#                 user = request.user
+#             else:
+#                 return Response({
+#                     'data': [],
+#                     'message': 'User not authenticated'
+#                 }, status=status.HTTP_401_UNAUTHORIZED)
+
+#             # Extract comment data from the request
+#             comment_text = request.data.get('add_comment')
+#             parent_comment_id = request.data.get('parent_comment_id')
+
+#             # Create a new comment instance
+#             comment = Comment.objects.create(user=user, add_comment=comment_text, user_username=user.username  # Assuming user.user_username exists 
+#                                              )
+
+#             # If it's a reply, create a new reply instance
+#             if parent_comment_id:
+#                 parent_comment = get_object_or_404(Comment, uid=parent_comment_id)
+#                 reply_text = request.data.get('add_reply')  # Extract reply text
+#                 reply = Reply.objects.create(comment=parent_comment, user=user, add_reply=reply_text)
+
+#             # Add the comment to the blog's comments
+#             blog.comments.add(comment)
+
+#             # Serialize the updated blog
+#             serializer = BlogDSerializer(blog)
+
+#             return Response({
+#                 'data': serializer.data,
+#                 'message': 'Comment posted successfully'
+#             }, status=status.HTTP_201_CREATED)
+
+#         except Exception as e:
+#             print(e)
+#             return Response({
+#                 'data': [],
+#                 'message': 'Something went wrong'
+#             }, status=status.HTTP_400_BAD_REQUEST)
+
         
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -757,7 +810,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
         # Assuming you have access to the user making the reply, you can get it from the request
         user = request.user
-
+    
         # Create the Reply instance with the user
         reply = Reply.objects.create(comment=comment, user=user, add_reply=reply_text)
 

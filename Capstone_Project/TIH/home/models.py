@@ -43,6 +43,7 @@ class Tag(models.Model):
 class Comment(BaseModel):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='comments')
     add_comment = models.TextField()
+    
     # parent_comment = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
 
     def __str__(self):

@@ -17,6 +17,9 @@ class ReplySerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     # parent_comment = serializers.PrimaryKeyRelatedField(queryset=Comment.objects.all(), required=False)
     replies = ReplySerializer(many=True, read_only=True)
+    comment_user = serializers.ReadOnlyField(source='user.username')
+
+
 
 
     class Meta:
