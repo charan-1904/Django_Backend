@@ -443,10 +443,11 @@ class MyBlogsView(APIView):
 
             # Convert usernames list to a single string if needed
             usernames_str = ', '.join(unique_usernames)
-
+            user=request.user
 
             return Response({
-                'username': usernames_str,
+                # 'username': usernames_str,
+                'username' : user.username,
                 'data': serializer.data,
                 'message': 'Blogs fetched successfully'
             }, status=status.HTTP_200_OK)
@@ -892,6 +893,7 @@ class UserBlogsView(APIView):
                 }
                 blogs_data.append(blog_data)
                 usernames.append(blog_data['user_username'])  # Append username to the list
+                user=request.user
             if not blogs_data:
                 return Response({
                     'username' : username,
