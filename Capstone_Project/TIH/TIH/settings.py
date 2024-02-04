@@ -156,7 +156,7 @@ DATABASES = {
         "HOST": os.environ.get("DB_HOST", "mysql"),
         "PORT": os.environ.get("DB_PORT", "3306"),
     }
-}
+}   
 
 # DATABASES = {
 #     'default': {

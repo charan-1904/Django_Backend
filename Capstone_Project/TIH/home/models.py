@@ -69,7 +69,7 @@ class Blog(BaseModel):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='blogs')
     title = models.CharField(max_length=50)
     summary = models.CharField(max_length=5000000)
-    description=models.CharField(max_length=50000000000)
+    description=models.TextField()
     main_image = models.TextField(null = True)
     upload_image = models.ImageField(upload_to="blogs", null=True, blank=True)
     # video = models.FileField(upload_to="blogs", null=True, blank=True)
