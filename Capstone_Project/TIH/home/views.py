@@ -850,6 +850,8 @@ class ContactFormView(APIView):
         
 
 
+
+
 class UserBlogsView(APIView):
     def get(self, request, *args, **kwargs):
         try:
@@ -890,7 +892,12 @@ class UserBlogsView(APIView):
                 }
                 blogs_data.append(blog_data)
                 usernames.append(blog_data['user_username'])  # Append username to the list
-
+            if not blogs_data:
+                return Response({
+                    'username' : username,
+                    'data': [],
+                    'message': 'No blogs found for the user'
+                }, status=status.HTTP_200_OK)
 
             # Sort the blogs_data by date in descending order
             blogs_data = sorted(blogs_data, key=lambda x: x['date'], reverse=True)
@@ -902,7 +909,8 @@ class UserBlogsView(APIView):
 
             # Return the response with all blogs_data
             return Response({
-                'username': blog_data['user_username'],
+                # 'username': blog_data['user_username'],
+                'username': username,
                 'data': blogs_data,
                 'message': 'Blogs fetched successfully'
             }, status=status.HTTP_200_OK)
