@@ -771,16 +771,53 @@ class CommentViewSet(viewsets.ModelViewSet):
     
 
 
+# class UpvoteBlogView(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def post(self, request, uid):
+#         try:
+#             blog = get_object_or_404(Blog, uid=uid)
+
+#             # Check if the user has already upvoted this blog
+#             user = self.request.user
+#             if blog.upvoted_users.filter(id=user.id).exists():
+#                 return Response({'message': 'You have already upvoted this blog'}, status=status.HTTP_400_BAD_REQUEST)
+
+#             # If the user has not upvoted, increment the upvotes count
+#             blog.upvotes += 1
+#             blog.upvoted_users.add(user)
+#             blog.save()
+
+#             return Response({'message': 'Upvoted successfully'}, status=status.HTTP_200_OK)
+#         except Blog.DoesNotExist:
+#             return Response({'message': 'Blog not found'}, status=status.HTTP_404_NOT_FOUND)
 class UpvoteBlogView(APIView):
-    def post(self, request, blog_id):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, uid):
         try:
-            blog = Blog.objects.get(uid=blog_id)
+            blog = get_object_or_404(Blog, uid=uid)
+
+            # Check if the user has already upvoted this blog
+            user = self.request.user
+            upvoted_users = blog.upvoted_users.split(',')
+
+            if user.username in upvoted_users:
+                return Response({'message': 'You have already upvoted this blog'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # If the user has not upvoted, increment the upvotes count
             blog.upvotes += 1
+
+            # Append the username to the comma-separated list
+            upvoted_users.append(user.username)
+            blog.upvoted_users = ','.join(upvoted_users)
+
             blog.save()
+
             return Response({'message': 'Upvoted successfully'}, status=status.HTTP_200_OK)
+
         except Blog.DoesNotExist:
             return Response({'message': 'Blog not found'}, status=status.HTTP_404_NOT_FOUND)
-        
 
 
 

@@ -60,6 +60,10 @@ class Reply(BaseModel):
 
     def __str__(self):
         return f"Reply to {self.comment} - {self.text[:20]}"
+    
+
+class UpvotedUser(models.Model):
+    username = models.CharField(max_length=150, unique=True)
 
 class Blog(BaseModel):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='blogs')
@@ -74,6 +78,7 @@ class Blog(BaseModel):
     # votes = models.IntegerField(null = True)
     upvotes = models.IntegerField(default=0)
     is_featured = models.BooleanField(default=False)
+    upvoted_users = models.CharField(max_length=500, blank=True)
 
 
     def __str__(self):
