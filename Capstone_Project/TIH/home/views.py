@@ -745,6 +745,27 @@ class BlogDetailView(APIView):
                 'data': [],
                 'message': 'Something went wrong'
             }, status=status.HTTP_400_BAD_REQUEST)
+        
+
+    def delete(self, request, *args, **kwargs):
+        uid = kwargs.get('uid')
+
+        try:
+            blog = get_object_or_404(Blog, uid=uid)
+
+            # Check if the user has permission to delete the blog
+            if not request.user == blog.user:
+                return Response({'message': 'You do not have permission to delete this blog'},
+                                status=status.HTTP_403_FORBIDDEN)
+
+            # Delete the blog
+            blog.delete()
+
+            return Response({'message': 'Blog deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            print(e)
+            return Response({'message': 'Something went wrong'}, status=status.HTTP_400_BAD_REQUEST)
 
         
 
