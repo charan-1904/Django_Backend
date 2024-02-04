@@ -1,3 +1,4 @@
+import random
 from django.shortcuts import render
 from rest_framework.response import Response
 
@@ -678,10 +679,16 @@ class BlogDetailView(APIView):
 
         try:
             blog = get_object_or_404(Blog, uid=uid)
-            serializer = BlogDSerializer(blog)
 
+
+            related_post = self.get_related_posts(blog)
+
+            # print(related_post[0])  
+            
+            serializer = BlogDSerializer(blog)
             return Response({
                 'data': serializer.data,
+                'related_posts' : related_post,
                 'message': 'Blog fetched successfully'
             }, status=status.HTTP_200_OK)
 
@@ -691,6 +698,15 @@ class BlogDetailView(APIView):
                 'data': [],
                 'message': 'Something went wrong'
             }, status=status.HTTP_400_BAD_REQUEST)
+        
+    def get_related_posts(self, blog):
+        # Get multiple related posts with the same tag (case-insensitive)
+        related_posts = Blog.objects.filter(tags__iexact=blog.tags).exclude(uid=blog.uid)
+        related_posts_data = []
+        for related_post in related_posts:
+            related_post_serializer = BlogDSerializer(related_post)
+            related_posts_data.append(related_post_serializer.data)
+        return related_posts_data
 
     def post(self, request, *args, **kwargs):
         uid = kwargs.get('uid')
