@@ -68,7 +68,7 @@ class UpvotedUser(models.Model):
 class Blog(BaseModel):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='blogs')
     title = models.CharField(max_length=50)
-    summary = models.CharField(max_length=5000000)
+    summary = models.TextField()
     description=models.TextField()
     main_image = models.TextField(null = True)
     upload_image = models.ImageField(upload_to="blogs", null=True, blank=True)
