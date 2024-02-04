@@ -79,6 +79,7 @@ class Blog(BaseModel):
     upvotes = models.IntegerField(default=0)
     is_featured = models.BooleanField(default=False)
     upvoted_users = models.CharField(max_length=500, blank=True)
+    # dummy_is_featured=models.BooleanField(default=False)
 
 
     def __str__(self):

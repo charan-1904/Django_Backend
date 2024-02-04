@@ -233,7 +233,7 @@ class BlogView(APIView):
                 # Construct a single condition using the logical OR operator
                 conditions = Q()
                 for term in search_terms:
-                    conditions |= Q(title__icontains=term) | Q(user__username__icontains=term) | Q(summary__icontains=term)
+                    conditions |= Q(title__icontains=term) | Q(user__username__icontains=term) | Q(summary__icontains=term) | Q(tags__icontains = term)
 
                 # Apply the constructed condition to filter the queryset
                 blogs = blogs.filter(conditions)
@@ -978,3 +978,6 @@ class FeaturedBlogsView(APIView):
                 'data': [],
                 'message': 'Something went wrong'
             }, status=status.HTTP_400_BAD_REQUEST)
+
+
+
