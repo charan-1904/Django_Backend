@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from .views import BlogView, CommentViewSet, ContactFormView,MyBlogsView,BlogByTagView,BlogListView,BlogDetailView,UpvoteBlogView, UserBlogsView
+from .views import BlogView, CommentViewSet, ContactFormView,MyBlogsView,BlogByTagView,BlogListView,BlogDetailView,UpvoteBlogView, UserBlogsView,FeaturedBlogsView
 # from .views import CommentViewSet, add_reply
 
 
@@ -13,7 +13,7 @@ urlpatterns = [
     path('blog/<uuid:uid>/', BlogDetailView.as_view(), name='blog-detail'),
     # path('blog/tag/<str:tag_name>/', BlogByTagView.as_view(), name='blog-by-tag'),.
     path('blog/comments/<uuid:uid>/', BlogDetailView.as_view(), name='blog-detail'),
-
+    path('blog/is_featured', FeaturedBlogsView.as_view(), name = 'featured_view'),
 
     # path('blog/tag/<str:tag_name>/', BlogListView.as_view(), name='blog-list-by-tag'),
     path('blog/tag/<str:tag_name>/', BlogByTagView.as_view(), name='blog-lisby-tag'),

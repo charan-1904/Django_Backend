@@ -220,7 +220,7 @@ class BlogView(APIView):
                     "tag_link": blog.tags,
                     "tag": blog.tags,
                     "date": blog.created_at.strftime("%d %B %Y %H:%M"),
-                    "votes": 0,  # You may adjust this based on your logic
+                    "votes": blog.upvotes,  # You may adjust this based on your logic
                     "user_username": blog.user.username if blog.user else "",
                 }
                 blogs_data.append(blog_data)
@@ -868,6 +868,61 @@ class UserBlogsView(APIView):
                 'username': blog_data['user_username'],
                 'data': blogs_data,
                 'message': 'Blogs fetched successfully'
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            print(e)
+            return Response({
+                'data': [],
+                'message': 'Something went wrong'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.db.models import F
+from .models import Blog  # Import your Blog model
+from .serializers import BlogSerializer  # Import your BlogSerializer if you have one
+
+class FeaturedBlogsView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            # Fetch blogs ordered by highest votes
+            blogs = Blog.objects.filter(upvotes__gt=0).order_by('-upvotes')[:10]  # Adjust the number as needed
+
+            # Calculate the threshold for featured status dynamically (you can adjust this logic)
+            threshold_votes = 5  # Set your threshold value
+            featured_blogs_data = []
+
+            for blog in blogs:
+                is_featured = blog.upvotes > threshold_votes
+
+                if is_featured:
+                    featured_blog_data = {
+                        "id": blog.uid,
+                        "image": f"{blog.main_image}" if blog.main_image else "",
+                        "title": blog.title,
+                        "post_link": str(blog.uid),
+                        "tag_link": blog.tags,
+                        "tag": blog.tags,
+                        "date": blog.created_at.strftime("%d %B"),  # Format date as needed
+                        "votes": blog.upvotes,
+                        "user_username": blog.user.username if blog.user else "",
+                        "is_featured": is_featured,
+                    }
+
+                    featured_blogs_data.append(featured_blog_data)
+
+            # Return the response with featured blogs_data
+            return Response({
+                'data': featured_blogs_data,
+                'message': 'Featured blogs fetched successfully'
             }, status=status.HTTP_200_OK)
 
         except Exception as e:

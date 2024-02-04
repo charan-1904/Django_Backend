@@ -73,6 +73,8 @@ class Blog(BaseModel):
     comments = models.ManyToManyField(Comment, related_name='blog_comments', blank=True)
     # votes = models.IntegerField(null = True)
     upvotes = models.IntegerField(default=0)
+    is_featured = models.BooleanField(default=False)
+
 
     def __str__(self):
         return self.title
