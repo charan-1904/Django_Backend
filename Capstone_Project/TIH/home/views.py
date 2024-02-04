@@ -761,7 +761,7 @@ class BlogDetailView(APIView):
             # Delete the blog
             blog.delete()
 
-            return Response({'message': 'Blog deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+            return Response({'message': 'Blog deleted successfully'}, status=status.HTTP_200_OK)
 
         except Exception as e:
             print(e)
