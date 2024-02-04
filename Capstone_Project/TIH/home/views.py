@@ -507,7 +507,7 @@ class BlogByTagView(ListAPIView):
             # If tag_name is not provided, return a custom response
             return Blog.objects.none()  # or return an empty queryset
 
-        queryset = Blog.objects.filter(tags__iexact=tag_name)
+        queryset = Blog.objects.filter(Q(tags__iexact=tag_name) | Q(tags__iexact=tag_name.replace('-', ' ')))
 
         # Check if the user is authorized (replace this with your authorization logic)
         # if not self.request.user.is_authorized:
@@ -522,8 +522,8 @@ class BlogByTagView(ListAPIView):
             # Return a custom response if the queryset is empty
             return Response({
                 'data': {},
-                'message': 'You are not authorized to do this or the tag name is not provided',
-            }, status=status.HTTP_400_BAD_REQUEST)
+                'message': 'No Blogs Found',
+            }, status=status.HTTP_401_BAD_REQUEST)
 
         serializer = self.get_serializer(queryset, many=True)
         return Response({
@@ -745,6 +745,7 @@ class BlogDetailView(APIView):
                 'data': [],
                 'message': 'Something went wrong'
             }, status=status.HTTP_400_BAD_REQUEST)
+
         
 
 
