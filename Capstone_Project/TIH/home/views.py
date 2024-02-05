@@ -765,11 +765,39 @@ class BlogDetailView(APIView):
 
         except Exception as e:
             print(e)
+
             return Response({'message': 'Something went wrong'}, status=status.HTTP_400_BAD_REQUEST)
 
         
 
+    
+    def patch(self, request, *args, **kwargs):
+        uid = kwargs.get('uid')
 
+        try:
+            blog = get_object_or_404(Blog, uid=uid)
+
+            # Check if the user has permission to update the blog
+            if not request.user == blog.user:
+                return Response({'message': 'You do not have permission to update this blog'},
+                                status=status.HTTP_403_FORBIDDEN)
+
+            # Update the blog with the provided data
+            serializer = BlogDSerializer(blog, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            return Response({
+                'data': serializer.data,
+                'message': 'Blog updated successfully'
+            }, status=status.HTTP_202_ACCEPTED)
+
+        except Exception as e:
+            print(e)
+            return Response({
+                'data': [],
+                'message': 'Something went wrong'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
         
