@@ -89,7 +89,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://0.0.0.0.",
     "http://*",
     "http://localhost:3000",
-    "http://172.18.4.157:3000"
+    "http://172.18.4.157:3000",
+    "http://54.146.10.178:3000"
 ]
 
 ROOT_URLCONF = 'TIH.urls'
