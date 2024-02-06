@@ -523,7 +523,7 @@ class BlogByTagView(ListAPIView):
             return Response({
                 'data': {},
                 'message': 'No Blogs Found',
-            }, status=status.HTTP_401_BAD_REQUEST)
+            }, status=status.HTTP_404_NOT_FOUND)
 
         serializer = self.get_serializer(queryset, many=True)
         return Response({
