@@ -87,11 +87,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://0.0.0.0",
     "http://0.0.0.0.",
-    "http://*",
-    "http://localhost:3000",
-    "http://3.84.148.202:3000",
-    "http://172.18.4.157:3000",
-    "http://54.146.10.178:3000",
 ]
 
 ROOT_URLCONF = 'TIH.urls'
@@ -148,24 +143,24 @@ SESSION_COOKIE_AGE = 60
 
 
 
-import os
-DATABASES = {
-    "default": {
-        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.mysql"),
-        "NAME": os.environ.get("DB_NAME", "django_testing"),
-        "USER": os.environ.get("DB_USER", "admin"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", "admin"),
-        "HOST": os.environ.get("DB_HOST", "mysql"),
-        "PORT": os.environ.get("DB_PORT", "3306"),
-    }
-}
-
+# import os
 # DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
+#     "default": {
+#         "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.mysql"),
+#         "NAME": os.environ.get("DB_NAME", "django_testing"),
+#         "USER": os.environ.get("DB_USER", "admin"),
+#         "PASSWORD": os.environ.get("DB_PASSWORD", "admin"),
+#         "HOST": os.environ.get("DB_HOST", "mysql"),
+#         "PORT": os.environ.get("DB_PORT", "3306"),
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 # DATABASES = {
 # "default": {
