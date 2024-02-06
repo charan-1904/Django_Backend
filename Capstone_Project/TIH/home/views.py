@@ -689,7 +689,6 @@ class BlogDetailView(APIView):
             return Response({
                 'data': serializer.data,
                 'related_posts' : related_post,
-                'message': 'Blog fetched successfully'
             }, status=status.HTTP_200_OK)
 
         except Exception as e:
@@ -701,7 +700,7 @@ class BlogDetailView(APIView):
         
     def get_related_posts(self, blog):
         # Get multiple related posts with the same tag (case-insensitive)
-        related_posts = Blog.objects.filter(tags__iexact=blog.tags).exclude(uid=blog.uid)
+        related_posts = Blog.objects.filter(tags__iexact=blog.tags).exclude(uid=blog.uid)[:3]
         related_posts_data = []
         for related_post in related_posts:
             related_post_serializer = BlogDSerializer(related_post)
