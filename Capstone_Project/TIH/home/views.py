@@ -980,7 +980,7 @@ class UserBlogsView(APIView):
                 # 'username': blog_data['user_username'],
                 'username': username,
                 'data': blogs_data,
-                'message': 'Blogs fetched successfully'
+                # 'message': 'Blogs fetched successfully'
             }, status=status.HTTP_200_OK)
 
         except Exception as e:
