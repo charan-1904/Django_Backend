@@ -16,7 +16,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
 from django.db import connections
 from django.db.models import F
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 import traceback
 
 
@@ -691,17 +691,18 @@ class BlogDetailView(APIView):
                 'related_posts' : related_post,
             }, status=status.HTTP_200_OK)
 
+
         except Exception as e:
             print(e)
             return Response({
                 'data': [],
-                'message': 'Something went wrong'
-            }, status=status.HTTP_400_BAD_REQUEST)
+                'message': 'Blog not found'
+            }, status=status.HTTP_404_NOT_FOUND)
         
     def get_related_posts(self, blog):
         # Get multiple related posts with the same tag (case-insensitive)
         related_posts = Blog.objects.filter(tags__iexact=blog.tags).exclude(uid=blog.uid)[:3]
-        related_posts_data = []
+        related_posts_data = [] 
         for related_post in related_posts:
             related_post_serializer = BlogDSerializer(related_post)
             related_posts_data.append(related_post_serializer.data)
@@ -986,8 +987,8 @@ class UserBlogsView(APIView):
             print(e)
             return Response({
                 'data': [],
-                'message': 'Something went wrong'
-            }, status=status.HTTP_400_BAD_REQUEST)
+                'message': 'Blog not found'
+            }, status=status.HTTP_404_NOT_FOUND)
 
 
 
