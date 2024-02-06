@@ -507,7 +507,7 @@ class BlogByTagView(ListAPIView):
             # If tag_name is not provided, return a custom response
             return Blog.objects.none()  # or return an empty queryset
 
-        queryset = Blog.objects.filter(Q(tags__iexact=tag_name) | Q(tags__iexact=tag_name.replace('-', ' ')))
+        queryset = Blog.objects.filter(Q(tags__iexact=tag_name) | Q(tags__iexact=tag_name.replace('-', ' ')) | Q(tags__iexact=tag_name.replace(' ', '-')))
 
         # Check if the user is authorized (replace this with your authorization logic)
         # if not self.request.user.is_authorized:
