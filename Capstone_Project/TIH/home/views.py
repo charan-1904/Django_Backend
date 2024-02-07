@@ -870,7 +870,7 @@ class UpvoteBlogView(APIView):
             upvoted_users = blog.upvoted_users.split(',')
 
             if user.username in upvoted_users:
-                return Response({'message': 'You have already upvoted this blog'}, status=status.HTTP_40)
+                return Response({'message': 'You have already upvoted this blog'}, status=status.HTTP_400_BAD_REQUEST)
 
             # If the user has not upvoted, increment the upvotes count
             blog.upvotes += 1
