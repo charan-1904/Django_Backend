@@ -1007,10 +1007,10 @@ class FeaturedBlogsView(APIView):
     def get(self, request, *args, **kwargs):
         try:
             # Fetch blogs ordered by highest votes
-            blogs = Blog.objects.filter(upvotes__gt=0).order_by('-upvotes')[:10]  # Adjust the number as needed
+            blogs = Blog.objects.filter(upvotes__gt=0).order_by('-upvotes')[:5]  # Adjust the number as needed
 
             # Calculate the threshold for featured status dynamically (you can adjust this logic)
-            threshold_votes = 5  # Set your threshold value
+            threshold_votes = 0  # Set your threshold value
             featured_blogs_data = []
 
             for blog in blogs:
